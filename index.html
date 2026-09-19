@@ -214,6 +214,58 @@ footer a:hover { color: var(--txt); }
 .scroll-hint { border: 1px solid var(--line); background: rgba(20,23,31,.7);
   padding: 8px 18px; border-radius: 999px; backdrop-filter: blur(6px); }
 
+/* floating gradient orbs */
+.orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .38; pointer-events: none; }
+.orb.o1 { width: 430px; height: 430px; top: -130px; right: -70px;
+  background: radial-gradient(circle, rgba(108,140,255,.55), transparent 65%);
+  animation: drift1 11s ease-in-out infinite; }
+.orb.o2 { width: 350px; height: 350px; bottom: -110px; left: -50px;
+  background: radial-gradient(circle, rgba(154,108,255,.5), transparent 65%);
+  animation: drift2 14s ease-in-out infinite; }
+.orb.o3 { width: 230px; height: 230px; top: 38%; left: 56%;
+  background: radial-gradient(circle, rgba(90,209,154,.4), transparent 65%);
+  animation: drift1 17s ease-in-out infinite reverse; }
+@keyframes drift1 { 50% { transform: translate(-38px, 44px) scale(1.08); } }
+@keyframes drift2 { 50% { transform: translate(44px, -32px) scale(1.12); } }
+
+/* animated gradient border on featured cards */
+.card { border: 1px solid transparent;
+  background: linear-gradient(var(--bg2), var(--bg2)) padding-box,
+              linear-gradient(135deg, #2b3350, #222842) border-box; }
+.card:hover {
+  background: linear-gradient(var(--bg2), var(--bg2)) padding-box,
+              linear-gradient(135deg, var(--a1), var(--a2), var(--grn)) border-box;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 44px rgba(108,140,255,.14); }
+
+/* button shine sweep */
+.btn { position: relative; overflow: hidden; }
+.btn.pri::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-20deg); transition: left .5s; }
+.btn.pri:hover::after { left: 130%; }
+
+/* shimmering gradient headings */
+h2 em { font-style: normal;
+  background: linear-gradient(90deg, var(--a1), var(--a2), var(--grn), var(--a1));
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text;
+  color: transparent; animation: shimmer 5s linear infinite; }
+@keyframes shimmer { to { background-position: 220% 0; } }
+
+/* nav underline slide */
+nav .links a { position: relative; }
+nav .links a::after { content: ""; position: absolute; left: 0; bottom: -5px; height: 1.5px; width: 0;
+  background: linear-gradient(90deg, var(--a1), var(--a2)); transition: width .25s; }
+nav .links a:hover::after, nav .links a.active::after { width: 100%; }
+
+/* giant faded section numerals */
+.bg-num { position: absolute; top: 42px; right: 26px; font-family: var(--mono); font-weight: 700;
+  font-size: clamp(90px, 14vw, 175px); color: rgba(108,140,255,.065); line-height: 1;
+  user-select: none; pointer-events: none; }
+
+/* staggered pop-in */
+.pop { opacity: 0; transform: translateY(18px) scale(.98); transition: opacity .45s, transform .45s; }
+.pop.vis { opacity: 1; transform: none; }
+
 /* click burst */
 .burst { position: fixed; z-index: 98; font-family: var(--mono); font-weight: 700;
   pointer-events: none; animation: burst .7s ease-out forwards; text-shadow: 0 0 8px currentColor; }
@@ -256,6 +308,7 @@ footer a:hover { color: var(--txt); }
 </nav>
 
 <header id="top">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
   <div class="kicker">whoami --verbose</div>
   <div class="status"><i></i> defense systems: nominal · open to opportunities</div>
   <h1 class="glitch" data-text="NAVAIRGAP">NAVAIRGAP</h1>
@@ -272,6 +325,7 @@ footer a:hover { color: var(--txt); }
 <div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
 
 <section id="about" class="about reveal">
+  <span class="bg-num">01</span>
   <div class="sec-tag" data-scramble>01 · about</div>
   <h2>defense is <em>offense, inverted</em></h2>
   <div class="about-grid">
@@ -302,6 +356,7 @@ footer a:hover { color: var(--txt); }
 <div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
 
 <section id="skills" class="reveal">
+  <span class="bg-num">02</span>
   <div class="sec-tag" data-scramble>02 · skills</div>
   <h2>the <em>arsenal</em></h2>
   <div class="skills" id="skills-grid"></div>
@@ -310,18 +365,19 @@ footer a:hover { color: var(--txt); }
 <div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
 
 <section id="projects" class="reveal">
+  <span class="bg-num">03</span>
   <div class="sec-tag" data-scramble>03 · projects</div>
   <h2>things I've <em>built</em></h2>
 
   <div class="feat">
-    <div class="card tilt">
+    <div class="card tilt pop" style="transition-delay:.05s">
       <div class="gh">navairgap / SentinelWiFi</div>
       <h3><a href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">🛡️ SentinelWiFi</a></h3>
       <p>A passive, defensive auditor for your own WiFi and LAN. Evil-twin detection, rogue-DHCP checks, device inventory with newcomer alarms, exposed-service scanning, WPS/PMF analysis — graded A–F with plain-language fixes. CI greps every push to prove it stays offense-free.</p>
       <div class="tags"><span>python</span><span>scapy</span><span>linux</span><span>pytest</span><span>CI</span></div>
       <div class="meta" id="m-sentinel">★ — · ⑂ —</div>
     </div>
-    <div class="card tilt">
+    <div class="card tilt pop" style="transition-delay:.15s">
       <div class="gh">navairgap / banter</div>
       <h3><a href="https://github.com/navairgap/banter" target="_blank" rel="noopener">💬 banter</a></h3>
       <p>Real-time public chat rooms with Socket.IO. No accounts, no database — pick a nickname and talk. XSS-proof by construction, two-client integration tests, ships in one command.</p>
@@ -345,6 +401,7 @@ footer a:hover { color: var(--txt); }
 <div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
 
 <section id="contact" class="reveal">
+  <span class="bg-num">04</span>
   <div class="sec-tag" data-scramble>04 · contact</div>
   <h2>open a <em>channel</em></h2>
   <div class="contact-box">
@@ -535,8 +592,8 @@ const SKILLS = [
   ["Java", 70], ["JavaScript", 75], ["Node.js", 78], ["HTML/CSS", 82],
   ["Linux", 85], ["Networking", 80], ["Git", 88], ["Web3 / Solidity", 35],
 ];
-document.getElementById("skills-grid").innerHTML = SKILLS.map(([n, p]) => `
-  <div class="skill">
+document.getElementById("skills-grid").innerHTML = SKILLS.map(([n, p], i) => `
+  <div class="skill pop" style="transition-delay:${i * 45}ms">
     <div class="top"><span class="nm">${n}</span><span class="pct">${p}%</span></div>
     <div class="bar"><i data-w="${p}"></i></div>
   </div>`).join("");
@@ -605,13 +662,24 @@ io2.observe(document.getElementById("manifesto-quote").closest(".manifesto"));
     }
     const list = repos.filter(r => !featured.has(r.name));
     document.getElementById("repo-grid").innerHTML = list.map((r, i) => `
-      <a class="repo" href="${r.html_url}" target="_blank" rel="noopener">
+      <a class="repo pop" style="transition-delay:${(i % 8) * 40}ms" href="${r.html_url}" target="_blank" rel="noopener">
         <div class="rn"><span>${r.name}</span><span class="ri">${String(i+1).padStart(2, "0")}</span></div>
         <div class="rd">${r.description || ""}</div>
         <div class="rl">${r.language ? "● " + r.language : ""} ★ ${r.stargazers_count}</div>
       </a>`).join("");
+    observePops(document.getElementById("repo-grid"));
   } catch { /* keep defaults */ }
 })();
+
+/* ================= staggered pop-in ================= */
+function observePops(scope) {
+  (scope || document).querySelectorAll(".pop:not(.vis)").forEach(el => {
+    new IntersectionObserver((es, o) => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("vis"); o.unobserve(e.target); }
+    }), { threshold: .1 }).observe(el);
+  });
+}
+observePops(document);
 
 /* ================= custom cursor ================= */
 (() => {
