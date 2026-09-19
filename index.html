@@ -58,7 +58,7 @@ body { background: var(--bg); color: var(--txt); font-family: var(--sans); overf
 /* ---------- nav ---------- */
 nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   display: flex; align-items: center; gap: 26px; padding: 14px 28px;
-  background: rgba(15,17,23,.78); backdrop-filter: blur(14px);
+  background: rgba(15,17,23,.85); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line); }
 .logo { font-family: var(--mono); font-weight: 700; font-size: 17px; color: var(--txt); text-decoration: none; }
 .logo b { background: linear-gradient(90deg, var(--a1), var(--a2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -215,7 +215,7 @@ footer a:hover { color: var(--txt); }
   padding: 8px 18px; border-radius: 999px; backdrop-filter: blur(6px); }
 
 /* floating gradient orbs */
-.orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .38; pointer-events: none; }
+.orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .38; pointer-events: none; will-change: transform; }
 .orb.o1 { width: 430px; height: 430px; top: -130px; right: -70px;
   background: radial-gradient(circle, rgba(108,140,255,.55), transparent 65%);
   animation: drift1 11s ease-in-out infinite; }
@@ -446,7 +446,7 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
                    mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
       }
       float fbm(vec2 p){ float v=0., a=.5;
-        for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
+        for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
       void main(){
         vec2 uv = gl_FragCoord.xy/u_res.xy;
         vec2 p = uv*vec2(u_res.x/u_res.y,1.);
@@ -474,7 +474,7 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
 
   function size() {
-    const s = Math.min(devicePixelRatio, 1.5) * .7;
+    const s = Math.min(devicePixelRatio, 1) * .45;
     renderer.setSize(innerWidth, innerHeight, false);
     cv.style.width = "100%"; cv.style.height = "100%";
     uni.u_res.value.set(cv.width = innerWidth * s, cv.height = innerHeight * s);
@@ -487,9 +487,12 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
   const clock = new THREE.Clock();
   let visible = true;
   document.addEventListener("visibilitychange", () => visible = !document.hidden);
+  let last = 0;
   (function loop() {
     requestAnimationFrame(loop);
-    if (!visible) return;
+    const now = performance.now();
+    if (!visible || now - last < 33) return;   // ~30fps cap
+    last = now;
     uni.u_time.value = clock.getElapsedTime();
     renderer.render(scene, cam);
   })();
@@ -680,6 +683,37 @@ function observePops(scope) {
   });
 }
 observePops(document);
+
+/* ================= smooth scroll choreography ================= */
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const hero = document.querySelector("header");
+  const heroKids = [...hero.children].filter(el => !el.classList.contains("orb"));
+  const orbs = [...document.querySelectorAll(".orb")];
+  const zoomables = [...document.querySelectorAll(".feat, .about-grid, .skills, .repo-grid, .contact-box")];
+  let target = scrollY, cur = scrollY;
+  addEventListener("scroll", () => { target = scrollY; }, { passive: true });
+  (function frame() {
+    requestAnimationFrame(frame);
+    cur += (target - cur) * .12;                 // eased scroll position
+    const vh = innerHeight;
+    // hero parallax: content drifts up, shrinks, fades as you leave
+    const p = Math.min(cur / (vh * .85), 1);
+    heroKids.forEach((el, i) => {
+      el.style.transform = `translateY(${cur * (.28 + i * .05)}px) scale(${1 - p * .07})`;
+      el.style.opacity = 1 - p * .95;
+      el.style.pointerEvents = p > .6 ? "none" : "";
+    });
+    orbs.forEach((o, i) => o.style.translate = `0 ${cur * (.06 + i * .05)}px`);
+    // expanding effect: blocks scale up as they approach viewport center
+    for (const el of zoomables) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -120 || r.top > vh + 120) continue;
+      const prog = Math.max(0, Math.min(1, 1 - Math.abs(r.top + r.height / 2 - vh / 2) / (vh * .75)));
+      el.style.transform = `scale(${.945 + prog * .055})`;
+    }
+  })();
+})();
 
 /* ================= custom cursor ================= */
 (() => {
