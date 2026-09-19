@@ -294,6 +294,13 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
 .copy-btn:hover { background: rgba(108,140,255,.12); }
 .copy-btn.copied { color: var(--grn); border-color: rgba(90,209,154,.5); }
 
+/* terminal corner brackets on sections */
+section::before, section::after { content: ""; position: absolute; top: 26px; width: 20px; height: 20px;
+  border: 1.5px solid rgba(108,140,255,.4); pointer-events: none; }
+section::before { left: 6px; border-right: 0; border-bottom: 0; }
+section::after { right: 6px; border-left: 0; border-bottom: 0; }
+.manifesto::before, .manifesto::after { display: none; }
+
 /* click burst */
 .burst { position: fixed; z-index: 98; font-family: var(--mono); font-weight: 700;
   pointer-events: none; animation: burst .7s ease-out forwards; text-shadow: 0 0 8px currentColor; }
@@ -347,6 +354,7 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
     <a class="btn pri magnetic" href="#projects">./view_projects</a>
     <a class="btn sec magnetic" href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">sentinelwifi ↗</a>
     <a class="btn sec magnetic" href="https://github.com/navairgap/banter" target="_blank" rel="noopener">banter ↗</a>
+    <a class="btn sec magnetic" href="cv.html">résumé ↓</a>
   </div>
   <div class="scroll-hint">▼ scroll</div>
 </header>
@@ -540,6 +548,16 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
   });
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
 
+  /* interactive wireframe icosahedron — reacts to the mouse */
+  const igeo = new THREE.IcosahedronGeometry(.62, 1);
+  const wire = new THREE.LineSegments(new THREE.WireframeGeometry(igeo),
+    new THREE.LineBasicMaterial({ color: 0x5ad19a, transparent: true, opacity: .5 }));
+  const nodes = new THREE.Points(igeo, new THREE.PointsMaterial({ color: 0x9a6cff, size: .035, transparent: true, opacity: .9 }));
+  const ico = new THREE.Group();
+  ico.add(wire); ico.add(nodes);
+  ico.position.set(.72, .12, 0);
+  scene.add(ico);
+
   function size() {
     const s = Math.min(devicePixelRatio, 1) * .45;
     renderer.setSize(innerWidth, innerHeight, false);
@@ -561,6 +579,10 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
     if (!visible || now - last < 33) return;   // ~30fps cap
     last = now;
     uni.u_time.value = clock.getElapsedTime();
+    ico.rotation.y += .005;
+    ico.rotation.x += (uni.u_mouse.value.y - .5 - ico.rotation.x) * .04;
+    ico.position.y = .12 + Math.sin(uni.u_time.value * .8) * .04;
+    ico.visible = innerWidth > 880;
     renderer.render(scene, cam);
   })();
 
