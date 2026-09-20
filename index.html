@@ -510,28 +510,65 @@ footer a:hover { color: var(--ink); }
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
       float noise(vec2 p){
         vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
-        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
-                   mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+        return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),
+                   mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);
       }
       float fbm(vec2 p){ float v=0., a=.5;
         for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
+
+      vec3 skyColor(vec3 d, float t){
+        vec2 sp = d.xz/(abs(d.y)+0.55)*1.3;
+        float n1 = fbm(sp*1.5 + t*.02);
+        float n2 = fbm(sp*2.3 - t*.03 + n1);
+        float n3 = fbm(sp*3.1 + vec2(t*.015,-t*.02) + n2);
+        vec3 bone = vec3(.804,.769,.729);
+        vec3 c = vec3(0.);
+        c = mix(c, bone*.30, smoothstep(.35,.85,n1));
+        c = mix(c, bone*.20, smoothstep(.45,.9,n2)*.8);
+        c = mix(c, vec3(1.,.36,.36)*.09, smoothstep(.55,.95,n3)*.35);
+        return c;
+      }
+
       void main(){
-        vec2 uv = gl_FragCoord.xy/u_res.xy;
-        vec2 p = uv*vec2(u_res.x/u_res.y,1.);
-        float t = u_time*.05;
-        vec2 drift = (u_mouse-.5)*.25;
-        float n1 = fbm(p*1.6 + t + drift);
-        float n2 = fbm(p*2.4 - t*1.4 + n1*1.2);
-        float n3 = fbm(p*3.2 + vec2(t*.6, -t) + n2);
-        vec3 black = vec3(.0,.0,.0);
-        vec3 bone  = vec3(.804,.769,.729);
-        vec3 col = black;
-        col = mix(col, bone*.34, smoothstep(.35,.85,n1));
-        col = mix(col, bone*.22, smoothstep(.45,.9,n2)*.8);
-        col = mix(col, vec3(1.0,.36,.36)*.10, smoothstep(.55,.95,n3)*.35);  /* a whisper of red */
+        vec2 uv = (gl_FragCoord.xy - .5*u_res)/u_res.y;
+        uv += (u_mouse-.5)*.05;
+        float t = u_time;
+
+        vec3 bh  = vec3(0.9, 0.05, 0.0);                 /* black hole, right of centre */
+        vec3 ro  = vec3(-0.35 + sin(t*.07)*.06, 1.15, -4.2);
+        vec3 rd  = normalize(vec3(uv*1.15, 1.0));
+        vec3 p = ro, dir = rd;
+        vec3 glow = vec3(0.);
+        bool absorbed = false;
+        float py = p.y;
+
+        for(int i=0;i<48;i++){
+          vec3 to = bh - p;
+          float r = length(to);
+          if(r < 0.42){ absorbed = true; break; }        /* event horizon */
+          float ring = smoothstep(0.60,0.47,r)*smoothstep(0.40,0.47,r);
+          glow += vec3(1.,.98,.94)*ring*.30;             /* photon ring */
+          dir = normalize(dir + normalize(to)*(0.16/(r*r+0.06)));   /* gravity bends light */
+          p += dir*max(0.04, r*.14);
+          if((py*p.y < 0.0 || abs(p.y)<0.05) && abs(p.y)<0.05){
+            float rr = length(p.xz - bh.xz);
+            if(rr>0.55 && rr<2.7){                        /* accretion disk */
+              float ang = atan(p.z-bh.z, p.x-bh.x);
+              float sw = fbm(vec2(rr*2.1 - t*.22, ang*1.7 + t*.10));
+              float heat = smoothstep(2.7,0.6,rr);
+              float dop = 0.7 + 0.5*sin(ang + 1.4);       /* doppler beaming */
+              vec3 dc = mix(vec3(.28,.26,.24), vec3(1.,.99,.95), heat*(0.35+0.65*sw));
+              glow += dc * heat * dop * 0.16;
+            }
+          }
+          py = p.y;
+        }
+
+        vec3 col = absorbed ? vec3(0.) : skyColor(dir, t);
+        col += glow;
         col *= .94 + .06*sin(gl_FragCoord.y*1.7);
-        float d = distance(uv, vec2(.5));
-        col *= smoothstep(.95,.35,d)*.9+.1;
+        float d2 = length(uv*vec2(0.75,1.0));
+        col *= smoothstep(1.05,0.35,d2)*.92+.08;
         gl_FragColor = vec4(col,1.0);
       }`,
   });
