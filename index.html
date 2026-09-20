@@ -255,7 +255,6 @@ footer a:hover { color: var(--ink); }
 h1.glitch { text-shadow: 0 6px 44px rgba(0,0,0,.9); }
 .statement, .typer, .status, .hello { text-shadow: 0 2px 16px rgba(0,0,0,.95), 0 0 4px #000; }
 .rl { text-shadow: 0 3px 24px rgba(0,0,0,.95); }
-.pin-sticky { position: relative; }
 .pin-sticky::before { content: ""; position: absolute; inset: 0; z-index: 0;
   background: radial-gradient(ellipse 72% 58% at 50% 50%, rgba(0,0,0,.78), rgba(0,0,0,0) 76%); }
 .reveal-copy { position: relative; z-index: 1; }
@@ -562,7 +561,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
         float dist = 4.2 - u_scroll*2.6;
         vec3 ro = vec3(sin(t*.10)*.12, 0.85 - u_scroll*.22, -dist);
         vec3 rd = normalize(vec3(uv*1.15, 1.0));
-        float rot = t*0.5*tm;
+        float rot = t*0.65*tm;
         float cr = cos(rot), sr = sin(rot);
         mat2 R = mat2(cr, -sr, sr, cr);
         vec3 p = ro, dir = rd;
