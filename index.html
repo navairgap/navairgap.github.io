@@ -500,13 +500,14 @@ footer a:hover { color: var(--ink); }
   if (!renderer.getContext()) return startRain();
   const scene = new THREE.Scene();
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const uni = { u_time: { value: 0 }, u_res: { value: new THREE.Vector2(1, 1) }, u_mouse: { value: new THREE.Vector2(.5, .5) } };
+  const uni = { u_time: { value: 0 }, u_res: { value: new THREE.Vector2(1, 1) }, u_mouse: { value: new THREE.Vector2(.5, .5) }, u_scroll: { value: 0 } };
+  window.__uni = uni;
   const mat = new THREE.ShaderMaterial({
     uniforms: uni,
     vertexShader: "void main(){gl_Position=vec4(position,1.0);}",
     fragmentShader: `
       precision highp float;
-      uniform float u_time; uniform vec2 u_res; uniform vec2 u_mouse;
+      uniform float u_time; uniform vec2 u_res; uniform vec2 u_mouse; uniform float u_scroll;
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
       float noise(vec2 p){
         vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
@@ -515,7 +516,14 @@ footer a:hover { color: var(--ink); }
       }
       float fbm(vec2 p){ float v=0., a=.5;
         for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
-
+      float stars(vec3 d, float scale, float thresh){
+        vec2 sp = d.xz/(abs(d.y)+0.35)*scale;
+        vec2 cell = floor(sp);
+        vec2 f = fract(sp);
+        vec2 pos = vec2(hash(cell+1.31), hash(cell+2.77));
+        float m = smoothstep(0.08, 0.0, length(f-pos)) * step(thresh, hash(cell));
+        return m;
+      }
       vec3 skyColor(vec3 d, float t){
         vec2 sp = d.xz/(abs(d.y)+0.55)*1.3;
         float n1 = fbm(sp*1.5 + t*.02);
@@ -526,49 +534,51 @@ footer a:hover { color: var(--ink); }
         c = mix(c, bone*.30, smoothstep(.35,.85,n1));
         c = mix(c, bone*.20, smoothstep(.45,.9,n2)*.8);
         c = mix(c, vec3(1.,.36,.36)*.09, smoothstep(.55,.95,n3)*.35);
+        c += vec3(1.,.98,.94) * stars(d, 9.0, .84) * .8;
+        c += vec3(.9,.88,.85)  * stars(d, 22.0, .88) * .45;
         return c;
       }
-
       void main(){
         vec2 uv = (gl_FragCoord.xy - .5*u_res)/u_res.y;
-        uv += (u_mouse-.5)*.05;
+        uv += (u_mouse-.5)*.04;
         float t = u_time;
-
-        vec3 bh  = vec3(0.9, 0.05, 0.0);                 /* black hole, right of centre */
-        vec3 ro  = vec3(-0.35 + sin(t*.07)*.06, 1.15, -4.2);
+        float tm = 1.0 + u_scroll*2.5;                       /* spin-up as you fall */
+        vec3 bh  = vec3(0.0, 0.05, 0.0);                     /* dead centre */
+        float dist = 4.2 - u_scroll*2.6;                     /* scroll = falling in */
+        vec3 ro  = vec3(sin(t*.10)*.14, 1.15 - u_scroll*.35, -dist);
         vec3 rd  = normalize(vec3(uv*1.15, 1.0));
         vec3 p = ro, dir = rd;
         vec3 glow = vec3(0.);
         bool absorbed = false;
         float py = p.y;
-
         for(int i=0;i<48;i++){
           vec3 to = bh - p;
           float r = length(to);
-          if(r < 0.42){ absorbed = true; break; }        /* event horizon */
+          if(r < 0.42){ absorbed = true; break; }
           float ring = smoothstep(0.60,0.47,r)*smoothstep(0.40,0.47,r);
-          glow += vec3(1.,.98,.94)*ring*.30;             /* photon ring */
-          dir = normalize(dir + normalize(to)*(0.16/(r*r+0.06)));   /* gravity bends light */
+          glow += vec3(1.,.98,.94)*ring*(.30 + .09*noise(vec2(t*2.1, r*9.0)));
+          dir = normalize(dir + normalize(to)*(0.16/(r*r+0.06)));
           p += dir*max(0.04, r*.14);
           if((py*p.y < 0.0 || abs(p.y)<0.05) && abs(p.y)<0.05){
             float rr = length(p.xz - bh.xz);
-            if(rr>0.55 && rr<2.7){                        /* accretion disk */
+            if(rr>0.55 && rr<2.7){
               float ang = atan(p.z-bh.z, p.x-bh.x);
-              float sw = fbm(vec2(rr*2.1 - t*.22, ang*1.7 + t*.10));
+              float sw = fbm(vec2(rr*2.1 - t*(0.25*tm), ang*1.7 + t*(0.30*tm)));
               float heat = smoothstep(2.7,0.6,rr);
-              float dop = 0.7 + 0.5*sin(ang + 1.4);       /* doppler beaming */
+              float dop = 0.7 + 0.5*sin(ang + 1.4);
               vec3 dc = mix(vec3(.28,.26,.24), vec3(1.,.99,.95), heat*(0.35+0.65*sw));
-              glow += dc * heat * dop * 0.16;
+              glow += dc * heat * dop * 0.18;
             }
           }
           py = p.y;
         }
-
         vec3 col = absorbed ? vec3(0.) : skyColor(dir, t);
         col += glow;
+        col += glow*glow*.22;                                 /* cheap bloom */
+        col = 1.0 - exp(-col*1.5);                            /* filmic exposure */
         col *= .94 + .06*sin(gl_FragCoord.y*1.7);
-        float d2 = length(uv*vec2(0.75,1.0));
-        col *= smoothstep(1.05,0.35,d2)*.92+.08;
+        float d2 = length(uv*vec2(0.8,1.0));
+        col *= smoothstep(1.15,0.30,d2)*.90+.10;
         gl_FragColor = vec4(col,1.0);
       }`,
   });
@@ -808,7 +818,7 @@ io2.observe(document.getElementById("giant"));
   };
   measure(); addEventListener("resize", measure);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  let target = scrollY, cur = scrollY;
+  let target = scrollY, cur = scrollY, sp = 0;
   addEventListener("scroll", () => { target = scrollY; }, { passive: true });
   (function frame() {
     requestAnimationFrame(frame);
@@ -834,6 +844,9 @@ io2.observe(document.getElementById("giant"));
       const hp2 = clamp(-hr.top / (hr.height - vh), 0, 1);
       htrack.style.transform = `translateX(${-hp2 * hDist}px)`;
     }
+    const de = document.documentElement;
+    sp += ((de.scrollTop / (de.scrollHeight - de.clientHeight)) - sp) * .06;
+    if (window.__uni) window.__uni.u_scroll.value = sp;
   })();
 })();
 
