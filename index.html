@@ -153,6 +153,10 @@ h2 em { font-style: normal; color: var(--red); }
 /* photo panel */
 .photo { position: relative; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.5) contrast(1.08) brightness(.82); }
+.artbox { display: flex; align-items: center; justify-content: center; background: #000; }
+.artbox pre { font-family: var(--mono); font-size: clamp(7px, 1.3vw, 13px); line-height: 1.4;
+  color: var(--ink); white-space: pre; text-shadow: 0 0 6px rgba(205,196,186,.25); }
+.artbox pre b { color: var(--red); font-weight: 700; }
 .photo::after { content: ""; position: absolute; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: .12; pointer-events: none; }
@@ -338,9 +342,19 @@ footer a:hover { color: var(--ink); }
 
 <!-- photo band ・ 美 -->
 <section class="reveal" style="padding-top:40px">
-  <div class="photo pop" style="height:min(46vh,420px)">
-    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=80" alt="server room, dark" loading="lazy">
-    <div class="cap"><b>SHOWROOM</b> ・ SHOT ON BLACK ・ 美</div>
+  <div class="photo artbox pop" style="height:min(46vh,420px)">
+    <pre>╔══════════════════════════════════════════╗
+║  ▓▓ RACK-01 ▓▓              ■ ■ □ ■ □    ║
+╠══════════════════════════════════════════╣
+║  [████████░░]   81%    12.4A   ● ok       ║
+║  [████░░░░░░]   42%     9.1A   ● ok       ║
+║  [██████████]  <b>100%</b>   <b>21.0A</b>   ● <b>hot</b>      ║
+║  [██░░░░░░░░]   19%     4.4A   ● ok       ║
+║  [░░░░░░░░░░]   idle    0.9A   ● zzz      ║
+╠══════════════════════════════════════════╣
+║  INLET 21°C   LOAD 0.91   DRAW 1.2 kW    ║
+╚══════════════════════════════════════════╝</pre>
+    <div class="cap"><b>SHOWROOM</b> ・ RACK DIAGRAM ・ 美</div>
   </div>
 </section>
 
@@ -386,13 +400,30 @@ footer a:hover { color: var(--ink); }
         <div class="tags"><span>c</span><span>asm</span><span>qemu</span></div>
         <div class="meta">in development</div>
       </div>
-      <div class="hcard photo">
-        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=80" alt="circuit board macro" loading="lazy">
-        <div class="cap"><b>SIGNAL</b> ・ HARDWARE ・ 源</div>
+      <div class="hcard photo artbox">
+        <pre>              ┌───────────┐
+              │  GATEWAY  │  8c:90:2d:ca:7b:ac
+              └─────┬─────┘
+        ┌───────────┼─────────────┐
+        ▼           ▼             ▼
+   ┌────────┐  ┌─────────┐   ┌──────────┐
+   │ PHONE  │  │ LAPTOP  │   │  <b>☠ ROGUE</b>  │
+   └────────┘  └─────────┘   └──────────┘
+    .42            .23            <b>.66</b>
+                    ▲
+           sentinel is watching</pre>
+        <div class="cap"><b>SIGNAL</b> ・ TOPOLOGY ・ 源</div>
       </div>
-      <div class="hcard photo">
-        <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1400&q=80" alt="streams of code" loading="lazy">
-        <div class="cap"><b>TRAFFIC</b> ・ THE MEDIUM ・ 道</div>
+      <div class="hcard photo artbox">
+        <pre>            . - = <b>o</b> O
+        .        <b>|</b>        .
+      -    \     <b>|</b>   <b>*blip</b> -
+     = -----+----●----→    =
+      -     /    <b>|</b>  sweep -
+        .        <b>|</b>        .
+            O o = - .
+       [SENTINEL-01]</pre>
+        <div class="cap"><b>TRAFFIC</b> ・ RADAR ・ 道</div>
       </div>
       <a class="hcard more" href="https://github.com/navairgap?tab=repositories" target="_blank" rel="noopener">
         <div class="big">+ 15 more<br>in the pipeline</div>
