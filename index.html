@@ -10,9 +10,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root {
-  --bg: #0f1117; --bg2: #14171f; --bg3: #1b1f2b; --line: #232939;
+  --bg: #0f1117; --bg2: #14171f; --line: #232939;
   --txt: #e8ebf2; --mut: #7e87a0;
-  --a1: #6c8cff; --a2: #ff5c6c; --grn: #5ad19a; --red: #ff6c6c; --yel: #e0af68;
+  --a1: #6c8cff; --a2: #ff5c6c; --grn: #5ad19a; --yel: #e0af68;
   --mono: "JetBrains Mono", "DejaVu Sans Mono", monospace;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +28,15 @@ body { background: var(--bg); color: var(--txt); font-family: var(--mono); overf
 .wrap { position: relative; z-index: 1; }
 
 #progress { position: fixed; top: 0; left: 0; height: 2px; width: 0; z-index: 60;
-  background: linear-gradient(90deg, var(--a1), var(--a2)); }
+  background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2)); }
+
+/* side index 01/05 */
+#side-ind { position: fixed; right: 26px; top: 50%; transform: translateY(-50%); z-index: 40;
+  font-size: 12px; color: var(--mut); text-align: center; letter-spacing: .1em; }
+#side-ind .n { font-size: 20px; color: var(--grn); font-weight: 700; }
+#side-ind .track { width: 1.5px; height: 90px; background: var(--line); margin: 10px auto; position: relative; }
+#side-ind .fill { position: absolute; top: 0; left: 0; width: 100%; height: 0; background: linear-gradient(var(--a1), var(--a2)); }
+@media (max-width: 880px) { #side-ind { display: none; } }
 
 @media (hover: hover) and (pointer: fine) {
   body, a, button { cursor: none; }
@@ -36,7 +44,7 @@ body { background: var(--bg); color: var(--txt); font-family: var(--mono); overf
   #cur-dot { width: 6px; height: 6px; background: var(--grn); box-shadow: 0 0 10px var(--grn); transform: translate(-50%,-50%); }
   #cur-ring { width: 32px; height: 32px; border: 1.5px solid rgba(108,140,255,.6); transform: translate(-50%,-50%);
     transition: width .18s, height .18s, border-color .18s, background .18s; }
-  #cur-ring.big { width: 52px; height: 52px; border-color: var(--a2); background: rgba(255,92,108,.07); }
+  #cur-ring.big { width: 52px; height: 52px; border-color: var(--a2); background: rgba(255,92,108,.06); }
 }
 @media not ((hover: hover) and (pointer: fine)) { #cur-dot, #cur-ring { display: none; } }
 
@@ -47,17 +55,17 @@ body { background: var(--bg); color: var(--txt); font-family: var(--mono); overf
 #bootlog { width: min(560px, 90vw); font-size: 14px; line-height: 1.9; color: var(--grn); }
 #bootlog .dim { color: #4a5568; }
 #bootbar { width: min(560px, 90vw); height: 3px; background: var(--line); margin-top: 18px; border-radius: 3px; overflow: hidden; }
-#bootbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--a1), var(--a2)); transition: width .3s; }
+#bootbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2)); transition: width .3s; }
 #bootskip { margin-top: 14px; font-size: 12px; color: #3a4256; }
 
-/* ---------- nav (single hairline strip, like a status bar) ---------- */
+/* ---------- nav ---------- */
 nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   display: flex; align-items: center; gap: 26px; padding: 15px 30px;
   background: rgba(15,17,23,.85); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line); font-size: 13.5px; }
 .logo { font-weight: 700; font-size: 16px; color: var(--txt); text-decoration: none; }
 .logo b { color: var(--grn); }
-nav .links { margin-left: auto; display: flex; gap: 26px; }
+nav .links { margin-left: auto; display: flex; gap: 24px; }
 nav .links a { color: var(--mut); text-decoration: none; position: relative; transition: color .15s; }
 nav .links a:hover, nav .links a.active { color: var(--txt); }
 nav .links a::after { content: ""; position: absolute; left: 0; bottom: -5px; height: 1.5px; width: 0;
@@ -69,11 +77,11 @@ nav .links a:hover::after, nav .links a.active::after { width: 100%; }
 
 /* ---------- hero ---------- */
 header { min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
-  padding: 110px 26px 60px; max-width: 960px; margin: 0 auto; position: relative; }
+  padding: 110px 26px 60px; max-width: 1100px; margin: 0 auto; position: relative; }
 .hello { font-size: 15px; color: var(--mut); margin-bottom: 16px; }
 .hello b { color: var(--grn); font-weight: 700; }
-h1.glitch { font-weight: 700; font-size: clamp(48px, 9.5vw, 110px); letter-spacing: 1px;
-  position: relative; color: #fff; line-height: 1.05; }
+h1.glitch { font-weight: 700; font-size: clamp(52px, 10.5vw, 132px); letter-spacing: 1px;
+  position: relative; color: #fff; line-height: 1.02; }
 h1.glitch::before, h1.glitch::after { content: attr(data-text); position: absolute; inset: 0; overflow: hidden; }
 h1.glitch::before { color: var(--a1); animation: gl1 3.2s infinite linear alternate; }
 h1.glitch::after  { color: var(--a2); animation: gl2 2.7s infinite linear alternate; }
@@ -89,9 +97,9 @@ h1.glitch::after  { color: var(--a2); animation: gl2 2.7s infinite linear altern
   91% { clip-path: inset(8% 0 76% 0);  transform: translate(-6px, 0); }
   95% { clip-path: inset(40% 0 40% 0); transform: translate(4px, 0); }
   100% { clip-path: inset(0 0 90% 0);  transform: translate(0); } }
-.statement { font-size: clamp(18px, 2.6vw, 25px); font-weight: 500; margin-top: 26px; max-width: 700px; line-height: 1.5; }
+.statement { font-size: clamp(19px, 2.8vw, 27px); font-weight: 500; margin-top: 28px; max-width: 720px; line-height: 1.5; }
 .statement em { font-style: normal; color: var(--grn); }
-.typer { font-size: 15px; color: var(--mut); margin-top: 16px; min-height: 1.6em; }
+.typer { font-size: 15px; color: var(--mut); margin-top: 18px; min-height: 1.6em; }
 .typer .cur { display: inline-block; width: 9px; background: var(--grn); animation: blink 1s steps(1) infinite; color: transparent; }
 @keyframes blink { 50% { opacity: 0; } }
 .status { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; font-size: 12.5px;
@@ -107,49 +115,71 @@ h1.glitch::after  { color: var(--a2); animation: gl2 2.7s infinite linear altern
 .btn.sec { color: var(--txt); border: 1px solid var(--line); }
 .btn.sec:hover { border-color: var(--mut); }
 .btn.pri:hover { filter: brightness(1.15); }
-.btn.pri::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,.3), transparent);
-  transform: skewX(-20deg); transition: left .5s; }
-.btn.pri:hover::after { left: 130%; }
 .scroll-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
   color: #3a4256; font-size: 12px; animation: bob 2s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translate(-50%, 6px); } }
 
-/* ---------- editorial sections ---------- */
-section { max-width: 920px; margin: 0 auto; padding: 110px 26px; position: relative; }
-section::before, section::after { content: ""; position: absolute; top: 30px; width: 18px; height: 18px;
-  border: 1.5px solid rgba(108,140,255,.35); pointer-events: none; }
-section::before { left: 4px; border-right: 0; border-bottom: 0; }
-section::after { right: 4px; border-left: 0; border-bottom: 0; }
-.head { text-align: center; margin-bottom: 64px; }
+/* ---------- editorial: pinned line-reveal ---------- */
+.pin-wrap { height: 280vh; position: relative; }
+.pin-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+.reveal-copy { max-width: 900px; padding: 0 26px; }
+.rl { font-size: clamp(22px, 3.8vw, 42px); font-weight: 700; line-height: 1.4; margin-bottom: .45em;
+  opacity: .1; filter: blur(4px); will-change: opacity, filter, transform; }
+.rl em { font-style: normal; background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.rl .dim { color: var(--mut); font-weight: 400; }
+
+/* ---------- editorial: skill index ---------- */
+.idx-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px 18px; }
+.idx-head .sec-tag { font-size: 12.5px; letter-spacing: .14em; }
+.skillrow { border-top: 1px solid var(--line); padding: 22px 6px; display: flex; align-items: baseline; gap: 22px; }
+.skillrow:last-of-type { border-bottom: 1px solid var(--line); }
+.skillrow .no { font-size: 12px; color: #39415a; min-width: 30px; }
+.skillrow .nm { font-size: clamp(24px, 4.6vw, 50px); font-weight: 700; color: var(--mut); flex: 1;
+  transition: color .25s; line-height: 1.1; }
+.skillrow:hover .nm { background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.skillrow .meta { font-size: 12px; color: var(--mut); max-width: 0; overflow: hidden; white-space: nowrap;
+  transition: max-width .45s ease; }
+.skillrow:hover .meta { max-width: 440px; }
+.skillrow .pct { font-size: 14px; color: var(--grn); min-width: 46px; text-align: right; }
+
+/* ---------- editorial: horizontal projects ---------- */
+.hwrap { position: relative; }
+.hsticky { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; align-items: center; }
+.htrack { display: flex; gap: 26px; padding: 0 7vw; align-items: center; will-change: transform; }
+.hcard { flex-shrink: 0; width: min(480px, 82vw); border: 1px solid transparent; border-radius: 16px; padding: 30px;
+  background: linear-gradient(var(--bg2), var(--bg2)) padding-box, linear-gradient(135deg, #2b3350, #222842) border-box;
+  transition: box-shadow .18s; }
+.hcard:hover { background: linear-gradient(var(--bg2), var(--bg2)) padding-box,
+  linear-gradient(135deg, var(--a1), var(--grn), var(--a2)) border-box;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 44px rgba(108,140,255,.13); }
+.hcard.intro { background: none; border: 0; width: min(400px, 74vw); }
+.hcard.intro h2 { font-size: clamp(34px, 5.5vw, 58px); line-height: 1.1; }
+.hcard.intro p { color: var(--mut); margin-top: 14px; font-size: 14px; line-height: 1.7; }
+.hcard .gh { font-size: 12px; color: var(--mut); }
+.hcard h3 { font-size: 22px; margin: 9px 0 10px; }
+.hcard h3 a { color: var(--txt); text-decoration: none; }
+.hcard h3 a:hover { color: var(--a1); }
+.hcard p { color: var(--mut); font-size: 13.5px; line-height: 1.75; }
+.metrics { font-size: 11.5px; color: var(--grn); margin-top: 12px; }
+.hcard .tags { margin-top: 13px; display: flex; gap: 7px; flex-wrap: wrap; }
+.hcard .tags span { font-size: 11px; color: var(--a1); background: rgba(108,140,255,.1);
+  border: 1px solid rgba(108,140,255,.25); padding: 3px 10px; border-radius: 999px; }
+.hcard .meta { margin-top: 13px; font-size: 12px; color: var(--yel); }
+.hcard.more { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px;
+  background: linear-gradient(135deg, rgba(108,140,255,.1), rgba(255,92,108,.1)) padding-box;
+  border: 1px solid rgba(108,140,255,.35); }
+.hcard.more .big { font-size: clamp(24px, 3.4vw, 36px); font-weight: 700; line-height: 1.2; }
+
+/* ---------- timeline ---------- */
+section { max-width: 1000px; margin: 0 auto; padding: 120px 26px; position: relative; }
+.head { margin-bottom: 60px; }
 .sec-tag { color: var(--a1); font-size: 12.5px; letter-spacing: .14em; }
 .sec-tag::before { content: "// "; color: var(--mut); }
-h2 { font-size: clamp(30px, 4.6vw, 44px); font-weight: 700; margin-top: 10px; }
-h2 em { font-style: normal;
-  background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2));
+h2 { font-size: clamp(32px, 5vw, 52px); font-weight: 700; margin-top: 10px; line-height: 1.08; }
+h2 em { font-style: normal; background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2));
   -webkit-background-clip: text; background-clip: text; color: transparent; }
-.head p { color: var(--mut); font-size: 14.5px; margin-top: 14px; line-height: 1.8; max-width: 620px; margin-left: auto; margin-right: auto; }
-.divider { max-width: 920px; margin: 0 auto; padding: 0 26px; color: #252c40; font-size: 13px;
-  letter-spacing: .4em; user-select: none; text-align: center; }
-
-.reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s, transform .6s; }
-.reveal.vis { opacity: 1; transform: none; }
-.pop { opacity: 0; transform: translateY(16px); transition: opacity .45s, transform .45s; }
-.pop.vis { opacity: 1; transform: none; }
-
-/* about */
-.about p { color: var(--mut); line-height: 1.9; margin-bottom: 18px; font-size: 15px; }
-.about p b { color: var(--txt); }
-.about-grid { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; }
-.skull { font-size: 11px; line-height: 1.28; color: var(--grn);
-  background: rgba(20,23,31,.85); border: 1px solid var(--line); border-radius: 12px; padding: 22px;
-  text-shadow: 0 0 8px rgba(90,209,154,.3); overflow: auto; white-space: pre; }
-.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 30px; }
-.fact { background: rgba(20,23,31,.85); border: 1px solid var(--line); border-radius: 12px; padding: 18px; text-align: center; }
-.fact .n { font-size: 27px; font-weight: 700; color: var(--grn); }
-.fact .l { font-size: 11.5px; color: var(--mut); margin-top: 5px; }
-
-/* ---------- alternating timeline ---------- */
 .timeline { position: relative; max-width: 780px; margin: 0 auto; }
 .timeline::before { content: ""; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 2px;
   background: linear-gradient(var(--a1), var(--a2)); opacity: .3; transform: translateX(-50%); }
@@ -163,71 +193,40 @@ h2 em { font-style: normal;
 .tl-item h3 { font-size: 17px; margin: 6px 0 8px; }
 .tl-item p { color: var(--mut); font-size: 13.5px; line-height: 1.75; }
 
-/* ---------- skills: 3D flip cards ---------- */
-.skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-.skill3d { perspective: 900px; height: 92px; }
-.skill3d .inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3,.7,.3,1); }
-.skill3d:hover .inner { transform: rotateY(180deg); }
-.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.face.front { background: rgba(20,23,31,.9); border: 1px solid var(--line); }
-.face.front .nm { font-weight: 700; font-size: 15px; }
-.face.front .pct { font-size: 11.5px; color: var(--mut); }
-.face.front .bar { width: 60%; height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
-.face.front .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--a1), var(--a2)); border-radius: 4px; }
-.face.back { transform: rotateY(180deg); background: linear-gradient(135deg, rgba(108,140,255,.16), rgba(255,92,108,.16));
-  border: 1px solid rgba(108,140,255,.45); font-size: 11.5px; color: var(--txt); text-align: center; padding: 10px; line-height: 1.5; }
-
-/* ---------- projects ---------- */
-.feat { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 48px; }
-.card { border: 1px solid transparent; border-radius: 14px; padding: 26px; position: relative;
-  background: linear-gradient(var(--bg2), var(--bg2)) padding-box, linear-gradient(135deg, #2b3350, #222842) border-box;
-  transition: border-color .18s, box-shadow .18s; transform-style: preserve-3d; will-change: transform; }
-.card:hover { background: linear-gradient(var(--bg2), var(--bg2)) padding-box,
-  linear-gradient(135deg, var(--a1), var(--a2), var(--grn)) border-box;
-  box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 44px rgba(108,140,255,.13); }
-.card .gh { font-size: 12px; color: var(--mut); }
-.card h3 { font-size: 20px; margin: 9px 0 10px; }
-.card h3 a { color: var(--txt); text-decoration: none; }
-.card h3 a:hover { color: var(--a1); }
-.card p { color: var(--mut); font-size: 13.5px; line-height: 1.75; }
-.metrics { font-size: 11.5px; color: var(--grn); margin-top: 12px; }
-.card .tags { margin-top: 13px; display: flex; gap: 7px; flex-wrap: wrap; }
-.card .tags span { font-size: 11px; color: var(--a1); background: rgba(108,140,255,.1);
-  border: 1px solid rgba(108,140,255,.25); padding: 3px 10px; border-radius: 999px; }
-.card .meta { margin-top: 13px; font-size: 12px; color: var(--yel); }
-
-.repo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
-.repo { background: rgba(20,23,31,.85); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
-  text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; display: block; }
-.repo:hover { transform: translateY(-3px); border-color: var(--a2); }
-.repo .rn { font-weight: 700; font-size: 13.5px; color: var(--txt); display: flex; justify-content: space-between; }
-.repo .rn .ri { color: #39415a; font-weight: 400; }
-.repo .rd { font-size: 12px; color: var(--mut); margin-top: 7px; line-height: 1.55;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.repo .rl { margin-top: 10px; font-size: 11px; color: var(--grn); }
-
-/* manifesto */
-.manifesto { text-align: center; padding: 130px 26px; }
+/* ---------- manifesto ---------- */
+.manifesto { text-align: center; padding: 150px 26px; max-width: 1000px; margin: 0 auto; position: relative; }
 .manifesto q { quotes: none; font-size: clamp(22px, 4vw, 40px); font-weight: 700; line-height: 1.45;
-  max-width: 860px; display: inline-block; }
+  max-width: 880px; display: inline-block; }
 .manifesto q .w { display: inline-block; opacity: .1; transition: opacity .5s; }
 .manifesto.vis q .w { opacity: 1; }
 .manifesto q em { font-style: normal; color: var(--grn); }
 
-/* contact */
-.contact-box { background: rgba(20,23,31,.85); border: 1px solid var(--line); border-radius: 16px;
-  padding: 44px; text-align: center; }
-.contact-box > p { color: var(--mut); margin-bottom: 24px; font-size: 14.5px; line-height: 1.8; }
-.email-line { margin-top: 20px; font-size: 13.5px; color: var(--mut); }
-.copy-btn { font-size: 12px; margin-left: 10px; padding: 5px 12px; background: transparent; color: var(--a1);
-  border: 1px solid rgba(108,140,255,.4); border-radius: 8px; cursor: pointer; transition: all .15s; font-family: inherit; }
+/* ---------- contact: giant CTA ---------- */
+#contact { max-width: 1100px; text-align: left; }
+.giant { font-size: clamp(48px, 11vw, 140px); font-weight: 700; line-height: .98; letter-spacing: -1px; }
+.giant .l2 { background: linear-gradient(90deg, var(--a1), var(--grn), var(--a2));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.giant .w { display: inline-block; opacity: 0; transform: translateY(.35em); transition: opacity .5s, transform .5s; }
+.giant.vis .w { opacity: 1; transform: none; }
+.contact-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 44px; }
+.email-big { font-size: clamp(16px, 2.6vw, 24px); color: var(--mut); }
+.copy-btn { font-size: 12.5px; margin-left: 12px; padding: 7px 16px; background: transparent; color: var(--a1);
+  border: 1px solid rgba(108,140,255,.4); border-radius: 9px; cursor: pointer; transition: all .15s; font-family: inherit; }
 .copy-btn:hover { background: rgba(108,140,255,.12); }
 .copy-btn.copied { color: var(--grn); border-color: rgba(90,209,154,.5); }
+.marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  margin-top: 80px; padding: 14px 0; white-space: nowrap; }
+.marquee span { display: inline-block; animation: mq 22s linear infinite; color: var(--mut); font-size: 13px; letter-spacing: .2em; }
+@keyframes mq { to { transform: translateX(-50%); } }
 
 footer { border-top: 1px solid var(--line); padding: 26px; text-align: center; color: #4a5568; font-size: 12px; position: relative; z-index: 1; }
 footer a { color: var(--mut); text-decoration: none; }
 footer a:hover { color: var(--txt); }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s, transform .6s; }
+.reveal.vis { opacity: 1; transform: none; }
+.pop { opacity: 0; transform: translateY(16px); transition: opacity .45s, transform .45s; }
+.pop.vis { opacity: 1; transform: none; }
 
 .burst { position: fixed; z-index: 98; font-weight: 700; pointer-events: none;
   animation: burst .7s ease-out forwards; text-shadow: 0 0 8px currentColor; }
@@ -235,13 +234,17 @@ footer a:hover { color: var(--txt); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.4); } }
 
 @media (max-width: 880px) {
-  .about-grid, .feat { grid-template-columns: 1fr; }
-  .facts { grid-template-columns: 1fr 1fr; }
   nav .links { display: none; }
+  .pin-wrap { height: auto; }
+  .pin-sticky { position: static; height: auto; padding: 100px 0; }
+  .rl { opacity: 1; filter: none; }
+  .hsticky { position: static; height: auto; overflow: visible; }
+  .htrack { flex-direction: column; padding: 0 26px; align-items: stretch; }
+  .hcard { width: 100%; }
   .timeline::before { left: 8px; }
   .tl-item, .tl-item:nth-child(even) { width: 100%; margin-left: 0; padding: 0 0 38px 34px; text-align: left; }
   .tl-item::before, .tl-item:nth-child(even)::before { left: 1px; right: auto; }
-  section::before, section::after { display: none; }
+  .skillrow .meta { display: none; }
 }
 </style>
 </head>
@@ -250,6 +253,7 @@ footer a:hover { color: var(--txt); }
 <canvas id="gl"></canvas>
 <canvas id="rain"></canvas>
 <div id="progress"></div>
+<div id="side-ind"><div class="n" id="si-n">01</div><div class="track"><div class="fill" id="si-fill"></div></div><div>05</div></div>
 <div id="cur-ring"></div>
 <div id="cur-dot"></div>
 
@@ -265,9 +269,9 @@ footer a:hover { color: var(--txt); }
   <a class="logo" href="#top">nav<b>airgap</b>_</a>
   <div class="links">
     <a href="#about" data-scramble>01·about</a>
-    <a href="#journey" data-scramble>02·journey</a>
-    <a href="#skills" data-scramble>03·skills</a>
-    <a href="#projects" data-scramble>04·projects</a>
+    <a href="#skills" data-scramble>02·skills</a>
+    <a href="#projects" data-scramble>03·projects</a>
+    <a href="#journey" data-scramble>04·journey</a>
     <a href="#contact" data-scramble>05·contact</a>
   </div>
   <a class="gh-btn" href="https://github.com/navairgap" target="_blank" rel="noopener">GitHub ↗</a>
@@ -284,46 +288,76 @@ footer a:hover { color: var(--txt); }
     <a class="btn sec magnetic" href="cv.html">résumé ↓</a>
     <a class="btn sec magnetic" href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">sentinelwifi ↗</a>
   </div>
-  <div class="scroll-hint">▼ scroll</div>
+  <div class="scroll-hint">▼ scroll to begin</div>
 </header>
 
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
-
-<section id="about" class="about reveal">
-  <div class="head">
-    <div class="sec-tag" data-scramble>01 · about</div>
-    <h2>defense is <em>offense, inverted</em></h2>
-  </div>
-  <div class="about-grid">
-    <pre class="skull">        .-""""-.
-       / .--..--. \
-      | |  __  | |
-      | | (oo) | |
-      |  \_/\_/  |
-       \  .--.  /
-        '(o  o)`
-         /|    |
-        (_)    (_)
-     >> anonymity is
-        a design choice</pre>
-    <div>
-      <p>I'm a <b>defensive security enthusiast</b> and <b>backend developer</b>. I build tools that watch networks quietly — passive auditors, rogue-device detectors, and honest reports that tell people exactly what to fix and how.</p>
-      <p>My philosophy: <b>security tools should be passive, local-first, and honest about what they can't do.</b> SentinelWiFi enforces that in CI — a grep that fails the build if any offensive capability ever enters the codebase.</p>
-      <p>When I'm not auditing networks: real-time systems, Web3 experiments, CTFs.</p>
-      <div class="facts">
-        <div class="fact"><div class="n count" data-to="18" id="f-repos">0</div><div class="l">public repos</div></div>
-        <div class="fact"><div class="n count" data-to="2" id="f-followers">0</div><div class="l">followers</div></div>
-        <div class="fact"><div class="n count" data-to="15">0</div><div class="l">projects in the pipeline</div></div>
-      </div>
+<!-- 01 · about: pinned line-by-line reveal -->
+<div class="pin-wrap" id="about">
+  <div class="pin-sticky">
+    <div class="reveal-copy" id="rlines">
+      <div class="rl">most security tools assume <span class="dim">you already know security.</span></div>
+      <div class="rl">I build for the person <em>who doesn't.</em></div>
+      <div class="rl"><span class="dim">passive first. local always.</span> honest about limits.</div>
+      <div class="rl">defense is <em>offense, inverted.</em></div>
+      <div class="rl"><span class="dim">— navairgap · defensive security × backend</span></div>
     </div>
   </div>
+</div>
+
+<!-- 02 · skills: editorial index -->
+<section id="skills" class="reveal">
+  <div class="idx-head">
+    <div class="sec-tag" data-scramble>02 · skills — the arsenal</div>
+    <span style="color:#39415a;font-size:12px">hover a row</span>
+  </div>
+  <div id="skillrows"></div>
 </section>
 
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
+<!-- 03 · projects: horizontal scroll gallery -->
+<div class="hwrap" id="projects">
+  <div class="hsticky">
+    <div class="htrack" id="htrack">
+      <div class="hcard intro">
+        <div class="sec-tag">03 · projects</div>
+        <h2>things<br>I've <em style="font-style:normal;background:linear-gradient(90deg,var(--a1),var(--grn),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent">built</em></h2>
+        <p>keep scrolling — the gallery moves sideways.<br>two shipped projects, fifteen more in the pipeline.</p>
+      </div>
+      <div class="hcard">
+        <div class="gh">navairgap / SentinelWiFi</div>
+        <h3><a href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">🛡️ SentinelWiFi</a></h3>
+        <p>A passive, defensive auditor for your own WiFi and LAN — evil-twin detection, rogue-DHCP checks, device inventory with newcomer alarms, exposed-service scanning, WPS/PMF analysis, graded A–F with plain-language fixes.</p>
+        <div class="metrics">36 tests · CI-enforced · 100% passive · PyPI-ready</div>
+        <div class="tags"><span>python</span><span>scapy</span><span>linux</span><span>pytest</span><span>CI</span></div>
+        <div class="meta" id="m-sentinel">★ — · ⑂ —</div>
+      </div>
+      <div class="hcard">
+        <div class="gh">navairgap / banter</div>
+        <h3><a href="https://github.com/navairgap/banter" target="_blank" rel="noopener">💬 banter</a></h3>
+        <p>Real-time public chat rooms with Socket.IO. No accounts, no database — pick a nickname and talk. XSS-proof by construction, two-client integration tests.</p>
+        <div class="metrics">integration-tested · XSS-proof · 1-command deploy</div>
+        <div class="tags"><span>node.js</span><span>socket.io</span><span>websockets</span><span>express</span></div>
+        <div class="meta" id="m-banter">★ — · ⑂ —</div>
+      </div>
+      <div class="hcard">
+        <div class="gh">navairgap / airgap-os</div>
+        <h3><a href="https://github.com/navairgap" target="_blank" rel="noopener">🖥️ airgap-os</a></h3>
+        <p>A hobby kernel built from nothing: multiboot handoff, VGA driver, GDT, interrupts, memory manager, paging, syscalls, and eventually a shell. The deepest way to learn how computers work.</p>
+        <div class="metrics">stage 1 verified · ring 0 · freestanding C</div>
+        <div class="tags"><span>c</span><span>asm</span><span>qemu</span></div>
+        <div class="meta">in development</div>
+      </div>
+      <a class="hcard more" href="https://github.com/navairgap?tab=repositories" target="_blank" rel="noopener">
+        <div class="big">+ 15 more repos<br>in the pipeline</div>
+        <div class="metrics">dns tools · rust crates · web3 · ctf notes →</div>
+      </a>
+    </div>
+  </div>
+</div>
 
+<!-- 04 · journey -->
 <section id="journey" class="reveal">
   <div class="head">
-    <div class="sec-tag" data-scramble>02 · journey</div>
+    <div class="sec-tag" data-scramble>04 · journey</div>
     <h2>how I got <em>here</em></h2>
   </div>
   <div class="timeline">
@@ -340,12 +374,12 @@ footer a:hover { color: var(--txt); }
     <div class="tl-item pop" style="transition-delay:.19s">
       <div class="tl-year">2026 — mid</div>
       <h3>banter + the rebuild</h3>
-      <p>Finished the chat app a year after starting it. Then rebuilt its whole identity: ASCII-native, no AI slop.</p>
+      <p>Finished the chat app a year after starting it. Then rebuilt its identity: ASCII-native, no AI slop.</p>
     </div>
     <div class="tl-item pop" style="transition-delay:.26s">
       <div class="tl-year">2026 — now</div>
       <h3>18 repos, one aesthetic</h3>
-      <p>Fifteen project repos scaffolded with real plans, a glitch-art GitHub profile, and this portfolio.</p>
+      <p>Fifteen project repos scaffolded with real plans, a glitch-art profile, a WebGL portfolio — and an OS kernel in progress.</p>
     </div>
     <div class="tl-item now pop" style="transition-delay:.33s">
       <div class="tl-year">next</div>
@@ -355,92 +389,39 @@ footer a:hover { color: var(--txt); }
   </div>
 </section>
 
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
-
-<section id="skills" class="reveal">
-  <div class="head">
-    <div class="sec-tag" data-scramble>03 · skills</div>
-    <h2>the <em>arsenal</em></h2>
-    <p>hover a tile — the back face shows where it gets used.</p>
-  </div>
-  <div class="skills" id="skills-grid"></div>
-</section>
-
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
-
-<section id="projects" class="reveal">
-  <div class="head">
-    <div class="sec-tag" data-scramble>04 · projects</div>
-    <h2>things I've <em>built</em></h2>
-  </div>
-
-  <div class="feat">
-    <div class="card tilt pop" style="transition-delay:.05s">
-      <div class="gh">navairgap / SentinelWiFi</div>
-      <h3><a href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">🛡️ SentinelWiFi</a></h3>
-      <p>A passive, defensive auditor for your own WiFi and LAN — evil-twin detection, rogue-DHCP checks, device inventory with newcomer alarms, exposed-service scanning, WPS/PMF analysis, graded A–F with plain-language fixes.</p>
-      <div class="metrics">36 tests · CI-enforced · 100% passive · PyPI-ready</div>
-      <div class="tags"><span>python</span><span>scapy</span><span>linux</span><span>pytest</span><span>CI</span></div>
-      <div class="meta" id="m-sentinel">★ — · ⑂ —</div>
-    </div>
-    <div class="card tilt pop" style="transition-delay:.15s">
-      <div class="gh">navairgap / banter</div>
-      <h3><a href="https://github.com/navairgap/banter" target="_blank" rel="noopener">💬 banter</a></h3>
-      <p>Real-time public chat rooms with Socket.IO. No accounts, no database — pick a nickname and talk. XSS-proof by construction, two-client integration tests.</p>
-      <div class="metrics">integration-tested · XSS-proof · 1-command deploy</div>
-      <div class="tags"><span>node.js</span><span>socket.io</span><span>websockets</span><span>express</span></div>
-      <div class="meta" id="m-banter">★ — · ⑂ —</div>
-    </div>
-  </div>
-
-  <div class="sec-tag" style="margin-bottom:16px">all repositories</div>
-  <div class="repo-grid" id="repo-grid">
-    <div class="repo"><div class="rn">loading…</div><div class="rd">fetching from GitHub API</div></div>
-  </div>
-</section>
-
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
-
+<!-- manifesto -->
 <section class="manifesto reveal">
   <q id="manifesto-quote">I don't break systems. I build the ones that <em>notice</em> when someone tries — quietly, locally, and <em>honestly</em>.</q>
 </section>
 
-<div class="divider">~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~</div>
-
+<!-- 05 · contact: giant CTA -->
 <section id="contact" class="reveal">
-  <div class="head">
-    <div class="sec-tag" data-scramble>05 · contact</div>
-    <h2>open a <em>channel</em></h2>
-  </div>
-  <div class="contact-box">
-    <p>The most reliable way to reach me is through GitHub — issues, discussions, or pull requests on any of my projects get read first.</p>
+  <div class="sec-tag" data-scramble>05 · contact</div>
+  <h2 class="giant" id="giant">LET'S BUILD<br><span class="l2">SOMETHING</span> <span class="l2">DEFENSIBLE.</span></h2>
+  <div class="contact-row">
     <a class="btn pri magnetic" href="https://github.com/navairgap" target="_blank" rel="noopener">github.com/navairgap ↗</a>
-    <p class="email-line">nav54877@gmail.com <button class="copy-btn" id="copy-email">copy</button></p>
+    <span class="email-big">nav54877@gmail.com<button class="copy-btn" id="copy-email">copy</button></span>
   </div>
+  <div class="marquee"><span id="mq">OPEN TO OPPORTUNITIES — DEFENSIVE SECURITY — BACKEND ENGINEERING — NETWORKING — SYSTEMS — RUST — WEB3 — OPEN TO OPPORTUNITIES — DEFENSIVE SECURITY — BACKEND ENGINEERING — NETWORKING — SYSTEMS — RUST — WEB3 — </span></div>
 </section>
 
 <footer>
-  <span>© 2026 navairgap · built by hand, no trackers, no cookies · <a href="https://github.com/navairgap/navairgap" target="_blank" rel="noopener">profile readme</a></span>
+  <span>© 2026 navairgap · built by hand, no trackers, no cookies · <a href="cv.html">résumé</a> · <a href="https://github.com/navairgap/navairgap" target="_blank" rel="noopener">profile readme</a></span>
 </footer>
 
 </div>
 
 <script>
-/* ================= WebGL: nebula shader + wireframe icosahedron ================= */
+/* ================= WebGL: nebula + icosahedron ================= */
 (() => {
   const cv = document.getElementById("gl");
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false }); }
   catch (e) { return startRain(); }
   if (!renderer.getContext()) return startRain();
-
   const scene = new THREE.Scene();
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const uni = {
-    u_time: { value: 0 },
-    u_res:  { value: new THREE.Vector2(1, 1) },
-    u_mouse:{ value: new THREE.Vector2(.5, .5) },
-  };
+  const uni = { u_time: { value: 0 }, u_res: { value: new THREE.Vector2(1, 1) }, u_mouse: { value: new THREE.Vector2(.5, .5) } };
   const mat = new THREE.ShaderMaterial({
     uniforms: uni,
     vertexShader: "void main(){gl_Position=vec4(position,1.0);}",
@@ -464,13 +445,10 @@ footer a:hover { color: var(--txt); }
         float n2 = fbm(p*2.4 - t*1.4 + n1*1.2);
         float n3 = fbm(p*3.2 + vec2(t*.6, -t) + n2);
         vec3 deep = vec3(.055,.065,.10);
-        vec3 blue = vec3(.42,.55,1.0);
-        vec3 viol = vec3(1.0,.36,.42);
-        vec3 grn  = vec3(.35,.82,.60);
         vec3 col = deep;
-        col = mix(col, blue*.55, smoothstep(.35,.85,n1));
-        col = mix(col, viol*.5,  smoothstep(.45,.9,n2)*.8);
-        col = mix(col, grn*.30,  smoothstep(.55,.95,n3)*.35);
+        col = mix(col, vec3(.42,.55,1.0)*.55, smoothstep(.35,.85,n1));
+        col = mix(col, vec3(1.0,.36,.42)*.5,  smoothstep(.45,.9,n2)*.8);
+        col = mix(col, vec3(.35,.82,.60)*.30,  smoothstep(.55,.95,n3)*.35);
         col *= .94 + .06*sin(gl_FragCoord.y*1.7);
         float d = distance(uv, vec2(.5));
         col *= smoothstep(.95,.35,d)*.9+.1;
@@ -478,7 +456,6 @@ footer a:hover { color: var(--txt); }
       }`,
   });
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
-
   const igeo = new THREE.IcosahedronGeometry(.6, 1);
   const wire = new THREE.LineSegments(new THREE.WireframeGeometry(igeo),
     new THREE.LineBasicMaterial({ color: 0x5ad19a, transparent: true, opacity: .5 }));
@@ -487,7 +464,6 @@ footer a:hover { color: var(--txt); }
   ico.add(wire); ico.add(nodes);
   ico.position.set(.72, .12, 0);
   scene.add(ico);
-
   function size() {
     const s = Math.min(devicePixelRatio, 1) * .45;
     renderer.setSize(innerWidth, innerHeight, false);
@@ -514,7 +490,6 @@ footer a:hover { color: var(--txt); }
     ico.visible = innerWidth > 880;
     renderer.render(scene, cam);
   })();
-
   function startRain() {
     const c2 = document.getElementById("rain"), cx = c2.getContext("2d");
     c2.style.opacity = .14;
@@ -542,9 +517,8 @@ footer a:hover { color: var(--txt); }
         bar = document.querySelector("#bootbar i"), skip = document.getElementById("bootskip");
   if (sessionStorage.getItem("booted")) { boot.classList.add("done"); return; }
   const lines = [
-    ["navairgap.sec — secure boot v2.2", "dim"],
+    ["navairgap.sec — secure boot v3.0 (editorial)", "dim"],
     ["> loading defensive modules ......... OK", ""],
-    ["> mounting /dev/sentinel ............ OK", ""],
     ["> compiling shaders ................. OK", ""],
     ["> verifying passive-only integrity .. OK", ""],
     ["> access granted — welcome.", ""],
@@ -567,95 +541,71 @@ footer a:hover { color: var(--txt); }
   skip.onclick = () => { clearInterval(t); boot.classList.add("done"); sessionStorage.setItem("booted", "1"); };
 })();
 
-/* ================= greeting rotator ================= */
+/* ================= greeting ================= */
 (() => {
-  const HELL0S = ["hello","नमस्ते","こんにちは","привет","salam","你好","hola","bonjour","hallo","ciao","hej","olá","merhaba"];
-  const CHARS = "!<>-_\\/[]{}=+*^?#01";
+  const H = ["hello","नमस्ते","こんにちは","привет","salam","你好","hola","bonjour","hallo","ciao","hej","olá"];
+  const CH = "!<>-_\\/[]{}=+*^?#01";
   const el = document.getElementById("hello-word");
   let i = 0;
   setInterval(() => {
-    i = (i + 1) % HELL0S.length;
-    const target = HELL0S[i];
-    let frame = 0;
+    i = (i + 1) % H.length;
+    const target = H[i]; let f = 0;
     const t = setInterval(() => {
-      el.textContent = target.split("").map((ch, j) =>
-        j < frame ? ch : CHARS[Math.floor(Math.random() * CHARS.length)]).join("");
-      if (frame++ >= target.length) { clearInterval(t); el.textContent = target; }
+      el.textContent = target.split("").map((c, j) => j < f ? c : CH[Math.floor(Math.random() * CH.length)]).join("");
+      if (f++ >= target.length) { clearInterval(t); el.textContent = target; }
     }, 40);
   }, 2200);
 })();
 
 /* ================= typing roles ================= */
 (() => {
-  const roles = [
-    "cybersecurity enthusiast — defensive only",
-    "backend developer · real-time systems",
-    "python · java · c · c++ · rust",
-    "exploring web3",
-    "builder of SentinelWiFi & banter",
-  ];
+  const roles = ["cybersecurity — defensive only","backend · real-time systems","python · c · c++ · rust","exploring web3","building airgap-os"];
   const el = document.getElementById("typed");
   let ri = 0, ci = 0, del = false;
   (function tick() {
-    const word = roles[ri];
-    el.textContent = word.slice(0, ci);
-    if (!del) {
-      if (ci++ < word.length) return setTimeout(tick, 45);
-      del = true; return setTimeout(tick, 1700);
-    }
+    const w = roles[ri];
+    el.textContent = w.slice(0, ci);
+    if (!del) { if (ci++ < w.length) return setTimeout(tick, 45); del = true; return setTimeout(tick, 1700); }
     if (ci-- > 0) return setTimeout(tick, 22);
     del = false; ri = (ri + 1) % roles.length; setTimeout(tick, 300);
   })();
 })();
 
-/* ================= scramble hover ================= */
+/* ================= scramble ================= */
 (() => {
-  const CHARS = "!<>-_\\/[]{}—=+*^?#01";
+  const CH = "!<>-_\\/[]{}—=+*^?#01";
   document.querySelectorAll("[data-scramble]").forEach(el => {
-    const original = el.textContent;
-    let frame, iter;
+    const orig = el.textContent;
+    let fr, it;
     el.addEventListener("mouseenter", () => {
-      iter = 0; clearInterval(frame);
-      frame = setInterval(() => {
-        el.textContent = original.split("").map((ch, i) =>
-          i < iter ? ch : CHARS[Math.floor(Math.random() * CHARS.length)]).join("");
-        if (iter++ >= original.length) { clearInterval(frame); el.textContent = original; }
+      it = 0; clearInterval(fr);
+      fr = setInterval(() => {
+        el.textContent = orig.split("").map((c, i) => i < it ? c : CH[Math.floor(Math.random() * CH.length)]).join("");
+        if (it++ >= orig.length) { clearInterval(fr); el.textContent = orig; }
       }, 40);
     });
   });
 })();
 
-/* ================= skills: 3D flip cards ================= */
+/* ================= skills: editorial index ================= */
 const SKILLS = [
-  ["Python", 90, "SentinelWiFi, logforge, jobqueue — my primary language"],
-  ["C", 80, "tinykv — where memory management is the lesson"],
-  ["C++", 72, "systems fundamentals & performance work"],
-  ["Rust", 55, "ratelimit-rs — learning in public"],
-  ["Java", 70, "OOP depth, enterprise patterns"],
-  ["JavaScript", 75, "banter client, portfolio interactivity"],
-  ["Node.js", 78, "banter backend — real-time at the core"],
-  ["HTML/CSS", 82, "this portfolio — hand-built, no frameworks"],
-  ["Linux", 85, "daily driver — if it's not in a terminal…"],
-  ["Networking", 80, "the reason SentinelWiFi exists"],
-  ["Git", 88, "18 repos of practice"],
-  ["Web3 / Solidity", 35, "chainwatch & solidity-sandbox — exploring"],
+  ["Python", "90%","SentinelWiFi · logforge · jobqueue"], ["C", "80%","tinykv · airgap-os"],
+  ["C++", "72%","systems & performance"], ["Rust", "55%","ratelimit-rs · learning in public"],
+  ["Java", "70%","OOP depth · enterprise patterns"], ["JavaScript", "75%","banter client · this site"],
+  ["Node.js", "78%","banter backend · real-time"], ["HTML/CSS", "82%","hand-built, no frameworks"],
+  ["Linux", "85%","daily driver"], ["Networking", "80%","the reason SentinelWiFi exists"],
+  ["Git", "88%","18 repos of practice"], ["Web3", "35%","chainwatch · solidity-sandbox"],
 ];
-document.getElementById("skills-grid").innerHTML = SKILLS.map(([n, p, note], i) => `
-  <div class="skill3d pop" style="transition-delay:${i * 40}ms">
-    <div class="inner">
-      <div class="face front">
-        <span class="nm">${n}</span>
-        <div class="bar"><i style="width:${p}%"></i></div>
-        <span class="pct">${p}%</span>
-      </div>
-      <div class="face back">${note}</div>
-    </div>
+document.getElementById("skillrows").innerHTML = SKILLS.map(([n, p, note], i) => `
+  <div class="skillrow pop" style="transition-delay:${i * 35}ms">
+    <span class="no">${String(i + 1).padStart(2, "0")}</span>
+    <span class="nm">${n}</span>
+    <span class="meta">${note}</span>
+    <span class="pct">${p}</span>
   </div>`).join("");
 
-/* ================= word-by-word reveals ================= */
-function splitWords(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
+/* ================= word reveals ================= */
+function splitWords(el) {
   const walk = node => {
     [...node.childNodes].forEach(ch => {
       if (ch.nodeType === 3) {
@@ -673,18 +623,14 @@ function splitWords(id) {
   walk(el);
   el.querySelectorAll(".w").forEach((w, i) => w.style.transitionDelay = (i * 55) + "ms");
 }
-splitWords("statement");
-splitWords("manifesto-quote");
+splitWords(document.getElementById("statement"));
+splitWords(document.getElementById("manifesto-quote"));
+splitWords(document.getElementById("giant"));
 
 /* ================= observers ================= */
 const io = new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return;
   e.target.classList.add("vis");
-  e.target.querySelectorAll(".count").forEach(c => {
-    const to = +c.dataset.to; let v = 0;
-    const step = Math.max(1, Math.round(to / 30));
-    const t = setInterval(() => { v += step; if (v >= to) { v = to; clearInterval(t); } c.textContent = v; }, 34);
-  });
   io.unobserve(e.target);
 }), { threshold: .15 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
@@ -702,63 +648,74 @@ const io2 = new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return;
   e.target.classList.add("vis");
   io2.unobserve(e.target);
-}), { threshold: .4 });
+}), { threshold: .35 });
 io2.observe(document.getElementById("statement"));
 io2.observe(document.querySelector(".manifesto"));
+io2.observe(document.getElementById("giant"));
 
 /* ================= live GitHub data ================= */
 (async () => {
   try {
     const u = await (await fetch("https://api.github.com/users/navairgap")).json();
-    const fr = document.getElementById("f-repos");
-    fr.dataset.to = u.public_repos; fr.textContent = u.public_repos;
-    const fw = document.getElementById("f-followers");
-    fw.dataset.to = u.followers; fw.textContent = u.followers;
     const repos = await (await fetch("https://api.github.com/users/navairgap/repos?per_page=100&sort=updated")).json();
-    const featured = new Set(["SentinelWiFi", "banter", "navairgap"]);
     for (const r of repos) {
       if (r.name === "SentinelWiFi") document.getElementById("m-sentinel").textContent = `★ ${r.stargazers_count} · ⑂ ${r.forks_count}`;
       if (r.name === "banter") document.getElementById("m-banter").textContent = `★ ${r.stargazers_count} · ⑂ ${r.forks_count}`;
     }
-    const list = repos.filter(r => !featured.has(r.name));
-    document.getElementById("repo-grid").innerHTML = list.map((r, i) => `
-      <a class="repo pop" style="transition-delay:${(i % 8) * 40}ms" href="${r.html_url}" target="_blank" rel="noopener">
-        <div class="rn"><span>${r.name}</span><span class="ri">${String(i + 1).padStart(2, "0")}</span></div>
-        <div class="rd">${r.description || ""}</div>
-        <div class="rl">${r.language ? "● " + r.language : ""} ★ ${r.stargazers_count}</div>
-      </a>`).join("");
-    observePops(document.getElementById("repo-grid"));
   } catch { /* keep defaults */ }
 })();
 
-/* ================= smooth scroll choreography ================= */
+/* ================= editorial scroll engine ================= */
 (() => {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const hero = document.querySelector("header");
   const heroKids = [...hero.children];
-  const zoomables = [...document.querySelectorAll(".feat, .about-grid, .timeline, .contact-box, .skills, .repo-grid")];
+  const pinWrap = document.querySelector(".pin-wrap");
+  const rlines = [...document.querySelectorAll(".rl")];
+  const hwrap = document.getElementById("projects");
+  const htrack = document.getElementById("htrack");
+  let hDist = 0;
+  const measure = () => {
+    if (innerWidth > 880) {
+      hDist = Math.max(0, htrack.scrollWidth - innerWidth);
+      hwrap.style.height = (innerHeight + hDist) + "px";
+    } else { hwrap.style.height = "auto"; }
+  };
+  measure(); addEventListener("resize", measure);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   let target = scrollY, cur = scrollY;
   addEventListener("scroll", () => { target = scrollY; }, { passive: true });
   (function frame() {
     requestAnimationFrame(frame);
     cur += (target - cur) * .12;
     const vh = innerHeight;
-    const p = Math.min(cur / (vh * .85), 1);
+    // hero parallax
+    const hp = clamp(cur / (vh * .85), 0, 1);
     heroKids.forEach((el, i) => {
-      el.style.transform = `translateY(${cur * (.28 + i * .04)}px) scale(${1 - p * .07})`;
-      el.style.opacity = 1 - p * .95;
-      el.style.pointerEvents = p > .6 ? "none" : "";
+      el.style.transform = `translateY(${cur * (.28 + i * .04)}px) scale(${1 - hp * .07})`;
+      el.style.opacity = 1 - hp * .95;
+      el.style.pointerEvents = hp > .6 ? "none" : "";
     });
-    for (const el of zoomables) {
-      const r = el.getBoundingClientRect();
-      if (r.bottom < -120 || r.top > vh + 120) continue;
-      const prog = Math.max(0, Math.min(1, 1 - Math.abs(r.top + r.height / 2 - vh / 2) / (vh * .75)));
-      el.style.transform = `scale(${.945 + prog * .055})`;
+    hero.style.pointerEvents = hp > .6 ? "none" : "auto";
+    // pinned line reveal
+    if (innerWidth > 880) {
+      const r = pinWrap.getBoundingClientRect();
+      const p = clamp(-r.top / (r.height - vh), 0, 1);
+      rlines.forEach((el, i) => {
+        const lp = clamp(p * (rlines.length + .6) - i, 0, 1);
+        el.style.opacity = .1 + .9 * lp;
+        el.style.filter = `blur(${(1 - lp) * 4}px)`;
+        el.style.transform = `translateY(${(1 - lp) * 14}px)`;
+      });
+      // horizontal gallery
+      const hr = hwrap.getBoundingClientRect();
+      const hp2 = clamp(-hr.top / (hr.height - vh), 0, 1);
+      htrack.style.transform = `translateX(${-hp2 * hDist}px)`;
     }
   })();
 })();
 
-/* ================= custom cursor ================= */
+/* ================= cursor / magnetic / bursts / copy / progress ================= */
 (() => {
   const dot = document.getElementById("cur-dot"), ring = document.getElementById("cur-ring");
   let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
@@ -769,71 +726,56 @@ io2.observe(document.querySelector(".manifesto"));
     ring.style.left = rx + "px"; ring.style.top = ry + "px";
     requestAnimationFrame(follow);
   })();
-  document.querySelectorAll("a, button, .card, .repo, .skill3d").forEach(el => {
+  document.querySelectorAll("a, button, .hcard, .skillrow").forEach(el => {
     el.addEventListener("mouseenter", () => ring.classList.add("big"));
     el.addEventListener("mouseleave", () => ring.classList.remove("big"));
   });
 })();
-
-/* ================= magnetic buttons ================= */
 document.querySelectorAll(".magnetic").forEach(el => {
   el.addEventListener("mousemove", e => {
     const b = el.getBoundingClientRect();
-    const x = e.clientX - b.left - b.width / 2, y = e.clientY - b.top - b.height / 2;
-    el.style.transform = `translate(${x * .18}px, ${y * .22}px)`;
+    el.style.transform = `translate(${(e.clientX - b.left - b.width / 2) * .18}px, ${(e.clientY - b.top - b.height / 2) * .22}px)`;
   });
   el.addEventListener("mouseleave", () => el.style.transform = "");
 });
-
-/* ================= card tilt ================= */
-document.querySelectorAll(".tilt").forEach(card => {
-  card.addEventListener("mousemove", e => {
-    const b = card.getBoundingClientRect();
-    const x = (e.clientX - b.left) / b.width - .5, y = (e.clientY - b.top) / b.height - .5;
-    card.style.transform = `perspective(900px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) translateY(-4px)`;
-  });
-  card.addEventListener("mouseleave", () => card.style.transform = "");
-});
-
-/* ================= click glyph burst ================= */
 addEventListener("click", e => {
-  const glyphs = "01#$%&*+<>/\\";
-  const cols = ["#5ad19a", "#6c8cff", "#ff5c6c", "#e0af68"];
+  const glyphs = "01#$%&*+<>/\\", cols = ["#5ad19a", "#6c8cff", "#ff5c6c", "#e0af68"];
   for (let i = 0; i < 12; i++) {
     const s = document.createElement("span");
     s.className = "burst";
     s.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
     s.style.left = e.clientX + "px"; s.style.top = e.clientY + "px";
-    s.style.color = cols[i % cols.length];
-    const a = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 60;
-    s.style.setProperty("--dx", Math.cos(a) * dist + "px");
-    s.style.setProperty("--dy", Math.sin(a) * dist + "px");
+    s.style.color = cols[i % 4];
+    const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * 60;
+    s.style.setProperty("--dx", Math.cos(a) * d + "px");
+    s.style.setProperty("--dy", Math.sin(a) * d + "px");
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 700);
   }
 });
-
-/* ================= copy email ================= */
 document.getElementById("copy-email").addEventListener("click", function () {
   navigator.clipboard.writeText("nav54877@gmail.com").then(() => {
-    this.textContent = "copied ✓";
-    this.classList.add("copied");
+    this.textContent = "copied ✓"; this.classList.add("copied");
     setTimeout(() => { this.textContent = "copy"; this.classList.remove("copied"); }, 1800);
   });
 });
-
-/* ================= progress + active nav ================= */
 (() => {
-  const bar = document.getElementById("progress");
-  const secs = [...document.querySelectorAll("section, header")];
+  const bar = document.getElementById("progress"), fill = document.getElementById("si-fill"),
+        siN = document.getElementById("si-n");
+  const secs = [...document.querySelectorAll("section, .pin-wrap, .hwrap, header")];
   const links = [...document.querySelectorAll("nav .links a")];
+  const ids = ["about", "skills", "projects", "journey", "contact"];
   addEventListener("scroll", () => {
     const h = document.documentElement;
-    bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
+    const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
+    bar.style.width = (p * 100) + "%";
+    fill.style.height = (p * 100) + "%";
     const y = scrollY + innerHeight * .35;
     let cur = "top";
     secs.forEach(s => { if (s.offsetTop <= y) cur = s.id; });
     links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + cur));
+    const idx = ids.indexOf(cur);
+    if (idx >= 0) siN.textContent = "0" + (idx + 1);
   });
 })();
 </script>
