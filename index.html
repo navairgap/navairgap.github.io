@@ -251,6 +251,22 @@ footer a:hover { color: var(--ink); }
 .pop { opacity: 0; transform: translateY(14px); transition: opacity .45s, transform .45s; }
 .pop.vis { opacity: 1; transform: none; }
 
+/* readability over the black hole */
+h1.glitch { text-shadow: 0 6px 44px rgba(0,0,0,.9); }
+.statement, .typer, .status, .hello { text-shadow: 0 2px 16px rgba(0,0,0,.95), 0 0 4px #000; }
+.rl { text-shadow: 0 3px 24px rgba(0,0,0,.95); }
+.pin-sticky { position: relative; }
+.pin-sticky::before { content: ""; position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 72% 58% at 50% 50%, rgba(0,0,0,.78), rgba(0,0,0,0) 76%); }
+.reveal-copy { position: relative; z-index: 1; }
+h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
+.skillrow .meta, .skillrow .pct, .idx-head { text-shadow: 0 1px 10px #000; }
+.manifesto q, .giant { text-shadow: 0 4px 30px rgba(0,0,0,.95), 0 0 6px #000; }
+.contact-row, .email-big { text-shadow: 0 2px 14px #000; }
+.tl-item h3, .tl-item p, .tl-year { text-shadow: 0 1px 10px #000; }
+.hcard.intro h2, .hcard.intro p { text-shadow: 0 2px 16px #000; }
+.marquee { background: rgba(0,0,0,.55); }
+
 .burst { position: fixed; z-index: 98; font-weight: 700; pointer-events: none;
   animation: burst .7s ease-out forwards; }
 @keyframes burst { 0% { opacity: 1; transform: translate(0,0) scale(1); }
@@ -521,8 +537,7 @@ footer a:hover { color: var(--ink); }
         vec2 cell = floor(sp);
         vec2 f = fract(sp);
         vec2 pos = vec2(hash(cell+1.31), hash(cell+2.77));
-        float m = smoothstep(0.08, 0.0, length(f-pos)) * step(thresh, hash(cell));
-        return m;
+        return smoothstep(0.08, 0.0, length(f-pos)) * step(thresh, hash(cell));
       }
       vec3 skyColor(vec3 d, float t){
         vec2 sp = d.xz/(abs(d.y)+0.55)*1.3;
@@ -531,9 +546,9 @@ footer a:hover { color: var(--ink); }
         float n3 = fbm(sp*3.1 + vec2(t*.015,-t*.02) + n2);
         vec3 bone = vec3(.804,.769,.729);
         vec3 c = vec3(0.);
-        c = mix(c, bone*.30, smoothstep(.35,.85,n1));
-        c = mix(c, bone*.20, smoothstep(.45,.9,n2)*.8);
-        c = mix(c, vec3(1.,.36,.36)*.09, smoothstep(.55,.95,n3)*.35);
+        c = mix(c, bone*.22, smoothstep(.35,.85,n1));
+        c = mix(c, bone*.15, smoothstep(.45,.9,n2)*.8);
+        c = mix(c, vec3(1.,.36,.36)*.07, smoothstep(.55,.95,n3)*.35);
         c += vec3(1.,.98,.94) * stars(d, 9.0, .84) * .8;
         c += vec3(.9,.88,.85)  * stars(d, 22.0, .88) * .45;
         return c;
@@ -542,40 +557,46 @@ footer a:hover { color: var(--ink); }
         vec2 uv = (gl_FragCoord.xy - .5*u_res)/u_res.y;
         uv += (u_mouse-.5)*.04;
         float t = u_time;
-        float tm = 1.0 + u_scroll*2.5;                       /* spin-up as you fall */
-        vec3 bh  = vec3(0.0, 0.05, 0.0);                     /* dead centre */
-        float dist = 4.2 - u_scroll*2.6;                     /* scroll = falling in */
-        vec3 ro  = vec3(sin(t*.10)*.14, 1.15 - u_scroll*.35, -dist);
-        vec3 rd  = normalize(vec3(uv*1.15, 1.0));
+        float tm = 1.0 + u_scroll*2.5;
+        vec3 bh = vec3(0.0, 0.0, 0.0);
+        float dist = 4.2 - u_scroll*2.6;
+        vec3 ro = vec3(sin(t*.10)*.12, 0.85 - u_scroll*.22, -dist);
+        vec3 rd = normalize(vec3(uv*1.15, 1.0));
+        float rot = t*0.5*tm;
+        float cr = cos(rot), sr = sin(rot);
+        mat2 R = mat2(cr, -sr, sr, cr);
         vec3 p = ro, dir = rd;
         vec3 glow = vec3(0.);
         bool absorbed = false;
-        float py = p.y;
         for(int i=0;i<48;i++){
           vec3 to = bh - p;
           float r = length(to);
           if(r < 0.42){ absorbed = true; break; }
-          float ring = smoothstep(0.60,0.47,r)*smoothstep(0.40,0.47,r);
-          glow += vec3(1.,.98,.94)*ring*(.30 + .09*noise(vec2(t*2.1, r*9.0)));
+          float ring = smoothstep(0.505,0.462,r)*smoothstep(0.408,0.452,r);
+          glow += vec3(1.,.98,.94)*ring*(.20 + .06*noise(vec2(t*2.3, r*11.0)));
           dir = normalize(dir + normalize(to)*(0.16/(r*r+0.06)));
           p += dir*max(0.04, r*.14);
-          if((py*p.y < 0.0 || abs(p.y)<0.05) && abs(p.y)<0.05){
-            float rr = length(p.xz - bh.xz);
-            if(rr>0.55 && rr<2.7){
-              float ang = atan(p.z-bh.z, p.x-bh.x);
-              float sw = fbm(vec2(rr*2.1 - t*(0.25*tm), ang*1.7 + t*(0.30*tm)));
-              float heat = smoothstep(2.7,0.6,rr);
-              float dop = 0.7 + 0.5*sin(ang + 1.4);
-              vec3 dc = mix(vec3(.28,.26,.24), vec3(1.,.99,.95), heat*(0.35+0.65*sw));
-              glow += dc * heat * dop * 0.18;
+          float yd = abs(p.y);
+          if(yd < 0.40){
+            float rr = length(p.xz);
+            if(rr > 0.5 && rr < 2.7){
+              vec2 xz = R * p.xz;
+              float ang = atan(xz.y, xz.x);
+              float sw = fbm(vec2(rr*2.0 - t*(0.55*tm), ang*2.0));
+              float heat = smoothstep(2.7, 0.6, rr);
+              float rim = smoothstep(0.78, 0.55, rr);
+              float dop = 0.65 + 0.55*sin(ang + 1.4);
+              float prof = exp(-yd*yd*80.0);
+              vec3 dc = mix(vec3(.30,.28,.26), vec3(1.,.99,.95), heat*(0.35+0.65*sw));
+              dc += vec3(1.,.98,.93)*rim*0.85;
+              glow += dc * heat * dop * prof * 0.5;
             }
           }
-          py = p.y;
         }
         vec3 col = absorbed ? vec3(0.) : skyColor(dir, t);
         col += glow;
-        col += glow*glow*.22;                                 /* cheap bloom */
-        col = 1.0 - exp(-col*1.5);                            /* filmic exposure */
+        col += glow*glow*.20;
+        col = 1.0 - exp(-col*1.5);
         col *= .94 + .06*sin(gl_FragCoord.y*1.7);
         float d2 = length(uv*vec2(0.8,1.0));
         col *= smoothstep(1.15,0.30,d2)*.90+.10;
