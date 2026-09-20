@@ -545,7 +545,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
         float n3 = fbm(sp*3.1 + vec2(t*.015,-t*.02) + n2);
         vec3 bone = vec3(.804,.769,.729);
         vec3 c = vec3(0.);
-        c = mix(c, bone*.22, smoothstep(.35,.85,n1));
+        c = mix(c, bone*.17, smoothstep(.35,.85,n1));
         c = mix(c, bone*.15, smoothstep(.45,.9,n2)*.8);
         c = mix(c, vec3(1.,.36,.36)*.07, smoothstep(.55,.95,n3)*.35);
         c += vec3(1.,.98,.94) * stars(d, 9.0, .84) * .8;
@@ -558,8 +558,8 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
         float t = u_time;
         float tm = 1.0 + u_scroll*2.5;
         vec3 bh = vec3(0.0, 0.0, 0.0);
-        float dist = 4.2 - u_scroll*2.6;
-        vec3 ro = vec3(sin(t*.10)*.12, 0.85 - u_scroll*.22, -dist);
+        float dist = 3.8 - u_scroll*2.4;
+        vec3 ro = vec3(sin(t*.10)*.12, 0.80 - u_scroll*.20, -dist);
         vec3 rd = normalize(vec3(uv*1.15, 1.0));
         float rot = t*0.65*tm;
         float cr = cos(rot), sr = sin(rot);
@@ -570,32 +570,32 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
         for(int i=0;i<48;i++){
           vec3 to = bh - p;
           float r = length(to);
-          if(r < 0.42){ absorbed = true; break; }
-          float ring = smoothstep(0.505,0.462,r)*smoothstep(0.408,0.452,r);
-          glow += vec3(1.,.98,.94)*ring*(.20 + .06*noise(vec2(t*2.3, r*11.0)));
-          dir = normalize(dir + normalize(to)*(0.16/(r*r+0.06)));
+          if(r < 0.50){ absorbed = true; break; }
+          float ring = smoothstep(0.615,0.555,r)*smoothstep(0.485,0.545,r);
+          glow += vec3(1.,.97,.90)*ring*(.36 + .09*noise(vec2(t*2.3, r*11.0)));
+          dir = normalize(dir + normalize(to)*(0.23/(r*r+0.05)));
           p += dir*max(0.04, r*.14);
           float yd = abs(p.y);
           if(yd < 0.40){
             float rr = length(p.xz);
-            if(rr > 0.5 && rr < 2.7){
+            if(rr > 0.62 && rr < 3.2){
               vec2 xz = R * p.xz;
               float ang = atan(xz.y, xz.x);
               float sw = fbm(vec2(rr*2.0 - t*(0.55*tm), ang*2.0));
-              float heat = smoothstep(2.7, 0.6, rr);
-              float rim = smoothstep(0.78, 0.55, rr);
-              float dop = 0.65 + 0.55*sin(ang + 1.4);
+              float heat = smoothstep(3.2, 0.7, rr);
+              float rim = smoothstep(0.95, 0.68, rr);
+              float dop = 0.55 + 0.75*sin(ang + 1.4);
               float prof = exp(-yd*yd*80.0);
               vec3 dc = mix(vec3(.30,.28,.26), vec3(1.,.99,.95), heat*(0.35+0.65*sw));
-              dc += vec3(1.,.98,.93)*rim*0.85;
-              glow += dc * heat * dop * prof * 0.5;
+              dc += vec3(1.,.96,.86)*rim*1.1;
+              glow += dc * heat * dop * prof * 0.75;
             }
           }
         }
         vec3 col = absorbed ? vec3(0.) : skyColor(dir, t);
         col += glow;
-        col += glow*glow*.20;
-        col = 1.0 - exp(-col*1.5);
+        col += glow*glow*.30;
+        col = 1.0 - exp(-col*1.75);
         col *= .94 + .06*sin(gl_FragCoord.y*1.7);
         float d2 = length(uv*vec2(0.8,1.0));
         col *= smoothstep(1.15,0.30,d2)*.90+.10;
@@ -612,7 +612,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
   ico.position.set(.72, .12, 0);
   scene.add(ico);
   function size() {
-    const s = Math.min(devicePixelRatio, 1) * .45;
+    const s = Math.min(devicePixelRatio, 1) * .55;
     renderer.setSize(innerWidth, innerHeight, false);
     cv.style.width = "100%"; cv.style.height = "100%";
     uni.u_res.value.set(cv.width = innerWidth * s, cv.height = innerHeight * s);
@@ -628,7 +628,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
   (function loop() {
     requestAnimationFrame(loop);
     const now = performance.now();
-    if (!visible || now - last < 33) return;
+    if (!visible || now - last < 25) return;
     last = now;
     uni.u_time.value = clock.getElapsedTime();
     ico.rotation.y += .005;
