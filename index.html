@@ -26,7 +26,7 @@ body { background: var(--black); color: var(--ink); font-family: var(--mono); ov
 ::selection { background: var(--ink); color: #000; }
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #2b2721; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #4a443c; border-radius: 2px; }
 
 #gl, #rain { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 #rain { opacity: 0; }
@@ -67,10 +67,10 @@ body { background: var(--black); color: var(--ink); font-family: var(--mono); ov
   display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity .5s, visibility .5s; }
 #boot.done { opacity: 0; visibility: hidden; }
 #bootlog { width: min(560px, 90vw); font-size: 14px; line-height: 1.9; color: var(--ink); }
-#bootlog .dim { color: #453f38; }
+#bootlog .dim { color: #6a635a; }
 #bootbar { width: min(560px, 90vw); height: 2px; background: #241f1a; margin-top: 18px; }
 #bootbar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s; }
-#bootskip { margin-top: 14px; font-size: 12px; color: #453f38; }
+#bootskip { margin-top: 14px; font-size: 12px; color: #6a635a; }
 
 /* ---------- nav ---------- */
 nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; gap: 26px;
@@ -128,7 +128,7 @@ h1.glitch::after  { color: var(--ink-2); animation: gl2 2.7s infinite linear alt
 .dossier .v { font-size: 14.5px; color: var(--ink); margin-top: 5px; font-weight: 700; }
 .dossier .v.red { color: var(--red); }
 .scroll-hint { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
-  color: #6b635a; font-size: 12px; letter-spacing: .2em; animation: bob 2s ease-in-out infinite; }
+  color: #8a8178; font-size: 12px; letter-spacing: .2em; animation: bob 2s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translate(-50%, 6px); } }
 
 /* ---------- section furniture ---------- */
@@ -139,8 +139,6 @@ h2 { font-family: var(--disp); font-size: clamp(32px, 5.4vw, 56px); font-weight:
 h2 em { font-style: normal; color: var(--red); }
 .head { margin-bottom: 64px; }
 .head p { color: var(--ink-2); font-size: 14.5px; margin-top: 14px; line-height: 1.8; max-width: 600px; font-family: var(--sans); }
-.rule { max-width: 1000px; margin: 0 auto; padding: 0 26px; color: #2b2721; font-size: 12px;
-  letter-spacing: .5em; user-select: none; text-align: center; overflow: hidden; white-space: nowrap; }
 
 /* pinned line reveal */
 .pin-wrap { height: 280vh; position: relative; }
@@ -167,10 +165,11 @@ h2 em { font-style: normal; color: var(--red); }
 
 /* skill index */
 .idx-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px 16px; }
-.skillrow { border-top: 1px solid var(--line); padding: 20px 4px; display: flex; align-items: baseline; gap: 22px; }
+.skillrow { border-top: 1px solid var(--line); padding: 13px 4px; display: flex; align-items: baseline; gap: 22px; }
+.skillgroup { font-size: 11px; color: var(--ink-3); letter-spacing: .2em; padding: 20px 4px 4px; }
 .skillrow:last-of-type { border-bottom: 1px solid var(--line); }
-.skillrow .no { font-size: 11px; color: #453f38; min-width: 30px; transition: color .2s; }
-.skillrow .nm { font-family: var(--disp); font-size: clamp(24px, 4.8vw, 52px); font-weight: 700;
+.skillrow .no { font-size: 11px; color: #6a635a; min-width: 30px; transition: color .2s; }
+.skillrow .nm { font-family: var(--disp); font-size: clamp(22px, 4vw, 40px); font-weight: 700;
   color: var(--ink-3); flex: 1; transition: color .25s; line-height: 1.1; }
 .skillrow:hover .no { color: var(--red); }
 .skillrow:hover .nm { color: var(--ink); }
@@ -243,7 +242,7 @@ h2 em { font-style: normal; color: var(--red); }
 .marquee span { display: inline-block; animation: mq 26s linear infinite; color: var(--ink-3); font-size: 12px; letter-spacing: .3em; }
 @keyframes mq { to { transform: translateX(-50%); } }
 
-footer { border-top: 1px solid var(--line); padding: 26px; text-align: center; color: #453f38; font-size: 11.5px; position: relative; z-index: 1; }
+footer { border-top: 1px solid var(--line); padding: 26px; text-align: center; color: #6a635a; font-size: 11.5px; position: relative; z-index: 1; }
 footer a { color: var(--ink-3); text-decoration: none; }
 footer a:hover { color: var(--ink); }
 
@@ -283,6 +282,25 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
 @media (prefers-reduced-motion: reduce) {
   #grain, .marquee, .scroll-hint { display: none !important; }
   .typer .cur, .tl-item.now::before { animation: none !important; }
+}
+/* mobile nav strip */
+.mnav { display: none; }
+@media (max-width: 880px) {
+  nav { flex-wrap: wrap; padding: 10px 16px; }
+  .mnav { display: flex; order: 3; width: 100%; gap: 20px; overflow-x: auto;
+    padding: 10px 2px 2px; font-size: 12px; scrollbar-width: none; }
+  .mnav::-webkit-scrollbar { display: none; }
+  .mnav a { color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+  .mnav a.active { color: var(--ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hsticky { position: static; height: auto; overflow: visible; }
+  .htrack { flex-wrap: wrap; transform: none !important; padding: 0 26px; }
+  .hcard { width: min(470px, 100%); }
+  .hcard.photo { width: 100%; height: auto; min-height: 260px; }
+  .hprog { display: none; }
+  body, a, button { cursor: auto; }
+  #cur-dot, #cur-ring { display: none !important; }
 }
 .burst { position: fixed; z-index: 98; font-weight: 700; pointer-events: none;
   animation: burst .7s ease-out forwards; }
@@ -331,13 +349,20 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
 <nav>
   <a class="logo" href="#top">nav<b>airgap</b>_</a>
   <div class="links">
-    <a href="#about" data-scramble title="source">00・源</a>
-    <a href="#skills" data-scramble title="power">01・力</a>
-    <a href="#projects" data-scramble title="beauty">02・美</a>
-    <a href="#journey" data-scramble title="way">03・道</a>
-    <a href="#contact" data-scramble title="signal">04・信</a>
+    <a href="#about" data-scramble aria-label="about — source" title="source">00・源</a>
+    <a href="#skills" data-scramble aria-label="skills — power" title="power">01・力</a>
+    <a href="#projects" data-scramble aria-label="projects — beauty" title="beauty">02・美</a>
+    <a href="#journey" data-scramble aria-label="journey — way" title="way">03・道</a>
+    <a href="#contact" data-scramble aria-label="contact — signal" title="signal">04・信</a>
   </div>
   <a class="gh-btn" href="https://github.com/navairgap" target="_blank" rel="noopener">GitHub ↗</a>
+  <div class="mnav">
+    <a href="#about">00・源 about</a>
+    <a href="#skills">01・力 skills</a>
+    <a href="#projects">02・美 projects</a>
+    <a href="#journey">03・道 journey</a>
+    <a href="#contact">04・信 contact</a>
+  </div>
 </nav>
 
 <header id="top">
@@ -398,7 +423,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
 <section id="skills" class="reveal">
   <div class="idx-head">
     <div class="sec-tag" data-scramble>01・力 — the arsenal</div>
-    <span style="color:#453f38;font-size:11px">hover a row</span>
+    <span style="color:#6a635a;font-size:11px">hover a row</span>
   </div>
   <div id="skillrows"></div>
 </section>
@@ -410,7 +435,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
       <div class="hcard intro">
         <div class="sec-tag">02・美 — projects</div>
         <h2>things<br>I've <em style="font-style:normal;color:var(--red)">built</em></h2>
-        <p>keep scrolling — the gallery moves sideways.<br>two shipped. fifteen in the pipeline. one kernel in progress.</p>
+        <p>keep scrolling — the gallery moves sideways.<br>shipped · tested · documented — and always building.</p>
       </div>
       <div class="hcard">
         <div class="gh">navairgap / SentinelWiFi</div>
@@ -462,7 +487,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
         <div class="cap"><b>TRAFFIC</b> ・ RADAR ・ 道</div>
       </div>
       <a class="hcard more" href="https://github.com/navairgap?tab=repositories" target="_blank" rel="noopener">
-        <div class="big">+ 15 more<br>in the pipeline</div>
+        <div class="big">+ the lab<br>experiments in motion</div>
         <div class="metrics">dns tools · rust crates · web3 · ctf notes →</div>
       </a>
     </div>
@@ -494,8 +519,8 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
     </div>
     <div class="tl-item pop" style="transition-delay:.26s">
       <div class="tl-year">2026 — now</div>
-      <h3>18 repos, one aesthetic</h3>
-      <p>Fifteen repos with real plans, a glitch-art profile, a WebGL portfolio — and an OS kernel in progress.</p>
+      <h3>the lab grows</h3>
+      <p>More repos with real plans — security tools, rust crates, web3 — plus a public learning log.</p>
     </div>
     <div class="tl-item now pop" style="transition-delay:.33s">
       <div class="tl-year">next</div>
@@ -518,8 +543,6 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
     <a class="btn pri magnetic" href="https://github.com/navairgap" target="_blank" rel="noopener">github.com/navairgap ↗</a>
     <span class="email-big">nav54877@gmail.com<button class="copy-btn" id="copy-email">copy</button></span>
     <a class="btn sec magnetic" href="cv.html">résumé ↓ (print → PDF)</a>
-    <!-- add your own: <a class="btn sec" href="https://linkedin.com/in/yourhandle" target="_blank" rel="noopener">linkedin ↗</a>
-    <a class="btn sec" href="https://x.com/yourhandle" target="_blank" rel="noopener">x ↗</a> -->
   </div>
   <div class="marquee" aria-hidden="true"><span>力 POWER ・ 美 BEAUTY ・ 源 SOURCE ・ 道 WAY ・ 信 SIGNAL ・ 防 DEFENSE ・ BONE ON BLACK ・ NO SHADOW ・ GRAIN 5.5% ・ RADIUS 2 ・ 力 POWER ・ 美 BEAUTY ・ 源 SOURCE ・ 道 WAY ・ 信 SIGNAL ・ 防 DEFENSE ・ BONE ON BLACK ・ NO SHADOW ・ GRAIN 5.5% ・ RADIUS 2 ・ </span></div>
 </section>
@@ -540,6 +563,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
   try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false }); }
   catch (e) { return startRain(); }
   if (!renderer.getContext()) return startRain();
+  document.getElementById("rain").remove();
   const scene = new THREE.Scene();
   const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const lowPower = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
@@ -676,6 +700,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
       cols = Math.floor(c2.width / CH); drops = Array.from({length: cols}, () => Math.random() * -50); };
     rs(); addEventListener("resize", rs);
     setInterval(() => {
+      if (document.hidden) return;
       cx.fillStyle = "rgba(0,0,0,0.14)"; cx.fillRect(0, 0, c2.width, c2.height);
       cx.font = "14px monospace";
       for (let i = 0; i < cols; i++) {
@@ -772,21 +797,26 @@ setInterval(() => {
 })();
 
 /* ================= skills ================= */
-const SKILLS = [
-  ["Python", "90%","SentinelWiFi · logforge · jobqueue"], ["C", "80%","tinykv · airgap-os"],
-  ["C++", "72%","systems & performance"], ["Rust", "55%","ratelimit-rs · learning in public"],
-  ["Java", "70%","OOP depth · enterprise patterns"], ["JavaScript", "75%","banter client · this site"],
-  ["Node.js", "78%","banter backend · real-time"], ["HTML/CSS", "82%","hand-built, no frameworks"],
-  ["Linux", "85%","daily driver"], ["Networking", "80%","the reason SentinelWiFi exists"],
-  ["Git", "88%","18 repos of practice"], ["Web3", "35%","chainwatch · solidity-sandbox"],
+const SKILL_GROUPS = [
+  ["LANGUAGES", [["Python","90%","SentinelWiFi · logforge · jobqueue"],["C","80%","tinykv · airgap-os"],
+    ["C++","72%","systems & performance"],["Rust","55%","ratelimit-rs · learning in public"],
+    ["Java","70%","OOP depth · enterprise patterns"],["JavaScript","75%","banter client · this site"]]],
+  ["SYSTEMS", [["Linux","85%","daily driver"],["Networking","80%","the reason SentinelWiFi exists"],
+    ["Node.js","78%","banter backend · real-time"]]],
+  ["TOOLS", [["Git","88%","daily practice"],["HTML/CSS","82%","hand-built, no frameworks"]]],
 ];
-document.getElementById("skillrows").innerHTML = SKILLS.map(([n, p, note], i) => `
-  <div class="skillrow pop" style="transition-delay:${i * 35}ms">
-    <span class="no">${String(i + 1).padStart(2, "0")}</span>
+let rowN = 0;
+document.getElementById("skillrows").innerHTML = SKILL_GROUPS.map(([g, rows]) =>
+  `<div class="skillgroup">${g}</div>` + rows.map(([n, p, note]) => {
+    rowN++;
+    return `<div class="skillrow pop" style="transition-delay:${rowN * 30}ms">
+    <span class="no">${String(rowN).padStart(2, "0")}</span>
     <span class="nm">${n}</span>
     <span class="meta">${note}</span>
     <span class="pct">${p}</span>
-  </div>`).join("");
+  </div>`;
+  }).join("")
+).join("") + `<div class="skillgroup">EXPLORING — web3 · solidity · smart-contract security</div>`;
 
 /* ================= word reveals ================= */
 function splitWords(el) {
@@ -878,9 +908,9 @@ io2.observe(document.getElementById("giant"));
     heroKids.forEach((el, i) => {
       el.style.transform = `translateY(${cur * (.28 + i * .03)}px) scale(${1 - hp * .07})`;
       el.style.opacity = 1 - hp * .95;
-      el.style.pointerEvents = hp > .6 ? "none" : "";
+      el.style.pointerEvents = hp > .85 ? "none" : "";
     });
-    hero.style.pointerEvents = hp > .6 ? "none" : "auto";
+    hero.style.pointerEvents = hp > .85 ? "none" : "auto";
     if (innerWidth > 880) {
       const r = pinWrap.getBoundingClientRect();
       const p = clamp(-r.top / (r.height - vh), 0, 1);
@@ -926,6 +956,7 @@ io2.observe(document.getElementById("giant"));
     e.preventDefault();
     secs[+a.dataset.i].scrollIntoView({ behavior: "smooth" });
   }));
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const dot = document.getElementById("cur-dot"), ring = document.getElementById("cur-ring");
   let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
   addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY;
@@ -940,6 +971,7 @@ io2.observe(document.getElementById("giant"));
     el.addEventListener("mouseleave", () => ring.classList.remove("big"));
   });
 })();
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
 document.querySelectorAll(".magnetic").forEach(el => {
   el.addEventListener("mousemove", e => {
     const b = el.getBoundingClientRect();
@@ -948,6 +980,7 @@ document.querySelectorAll(".magnetic").forEach(el => {
   el.addEventListener("mouseleave", () => el.style.transform = "");
 });
 addEventListener("click", e => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const glyphs = "01#$%&*+<>/\\", cols = ["#cdc4ba", "#ff5c5c", "#8a8178"];
   for (let i = 0; i < 10; i++) {
     const s = document.createElement("span");
@@ -970,7 +1003,7 @@ document.getElementById("copy-email").addEventListener("click", function () {
 });
 (() => {
   const bar = document.getElementById("progress");
-  const links = [...document.querySelectorAll("nav .links a")];
+  const links = [...document.querySelectorAll("nav .links a, .mnav a")];
   const secs = [...document.querySelectorAll("section, .pin-wrap, .hwrap, header")];
   addEventListener("scroll", () => {
     const h = document.documentElement;
