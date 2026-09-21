@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>navairgap — résumé</title>
+<style>
+  :root { --a1:#6c8cff; --a2:#9a6cff; --grn:#5ad19a; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Segoe UI",system-ui,sans-serif; background:#0f1117; color:#e6e9f0;
+    display:flex; justify-content:center; padding:40px 18px; }
+  .cv { width:min(860px,100%); background:#151823; border:1px solid #262c3d; border-radius:14px; padding:46px 52px; }
+  h1 { font-size:34px; letter-spacing:2px; }
+  h1 b { background:linear-gradient(90deg,var(--a1),var(--a2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { color:#8b93a7; margin-top:6px; font-size:15px; }
+  .contact { margin-top:14px; font-family:monospace; font-size:13px; color:#8b93a7; }
+  .contact a { color:var(--a1); text-decoration:none; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.14em; color:var(--grn);
+    margin:34px 0 12px; font-family:monospace; border-bottom:1px solid #262c3d; padding-bottom:6px; }
+  p, li { color:#aab2c5; line-height:1.7; font-size:14.5px; }
+  .proj { margin-bottom:18px; }
+  .proj h3 { font-size:16px; color:#e6e9f0; }
+  .proj h3 span { font-family:monospace; font-size:12px; color:#8b93a7; font-weight:400; margin-left:8px; }
+  .tags { font-family:monospace; font-size:12px; color:var(--a1); margin-top:4px; }
+  ul { padding-left:20px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 30px; }
+  .print { position:fixed; top:18px; right:18px; font-family:monospace; font-size:13px;
+    background:linear-gradient(135deg,var(--a1),var(--a2)); color:#fff; border:0; padding:10px 18px;
+    border-radius:8px; cursor:pointer; }
+  @media print {
+    body { background:#fff; padding:0; }
+    .cv { border:0; border-radius:0; color:#111; background:#fff; width:100%; }
+    p, li, .sub, .contact { color:#333; }
+    .proj h3, h1 { color:#000; }
+    h1 b { background:none; color:#000; -webkit-text-fill-color:#000; }
+    h2 { color:#0a7a4f; border-color:#ccc; }
+    .tags { color:#335; }
+    .print { display:none; }
+  }
+</style>
+</head>
+<body>
+<button class="print" onclick="window.print()">print / save PDF</button>
+<div class="cv">
+  <h1>NAV<b>AIRGAP</b></h1>
+  <div class="sub">Cybersecurity enthusiast (defensive) · Backend developer</div>
+  <div class="contact">
+    GitHub: <a href="https://github.com/navairgap">github.com/navairgap</a> ·
+    Portfolio: <a href="https://navairgap.github.io">navairgap.github.io</a> ·
+    Email: nav54877@gmail.com
+  </div>
+
+  <h2>Summary</h2>
+  <p>Backend developer with a defensive-security focus. I build passive, local-first tools that audit networks honestly — and real-time systems behind them. Philosophy: security tools should be passive, local-first, and honest about what they can't do.</p>
+
+  <h2>Flagship projects</h2>
+  <div class="proj">
+    <h3>SentinelWiFi <span>— passive network security auditor</span></h3>
+    <p>Audits your own WiFi/LAN: evil-twin detection, rogue-DHCP checks, device inventory with newcomer alarms, exposed-service scanning, WPS/PMF analysis — graded A–F with plain-language fixes.</p>
+    <p>• CI pipeline greps every push to guarantee no offensive capability ever enters the codebase</p>
+    <p>• 36 unit + integration tests; graceful degradation across Linux/Windows, scapy/no-scapy, monitor/no-monitor</p>
+    <div class="tags">python · scapy · socket.io-free · pytest · github actions</div>
+  </div>
+  <div class="proj">
+    <h3>banter <span>— real-time public chat rooms</span></h3>
+    <p>Socket.IO chat with no accounts and no database. XSS-proof by construction (textContent-only rendering), two-client integration test suite, duplicate-name handling, typing indicators.</p>
+    <div class="tags">node.js · express · socket.io · websockets</div>
+  </div>
+  <div class="proj">
+    <h3>Open-source portfolio <span>— 18 public repositories</span></h3>
+    <p>Fifteen additional project repos scaffolded with real plans across security (dns-logger, arp-spoof detector, honeypot), systems (rust rate-limiter, C key-value store), and Web3 (chain explorer, solidity sandbox) — in active development.</p>
+    <div class="tags">python · rust · c · solidity</div>
+  </div>
+
+  <h2>Skills</h2>
+  <div class="grid">
+    <div><b>Languages:</b> Python, C, C++, Rust, Java, JavaScript</div>
+    <div><b>Backend:</b> Node.js, Express, Socket.IO, REST, WebSockets</div>
+    <div><b>Security:</b> passive recon, network auditing, TLS, WiFi security (WPA2/3, WPS, PMF)</div>
+    <div><b>Systems:</b> Linux (daily driver), Git, Bash, networking fundamentals</div>
+    <div><b>Web:</b> HTML5, CSS3, responsive design, WebGL basics</div>
+    <div><b>Exploring:</b> Web3, Solidity, smart-contract security</div>
+  </div>
+
+  <h2>Practices</h2>
+  <ul>
+    <li>Test-first: every project ships with a real test suite (36 tests on SentinelWiFi, integration tests on banter)</li>
+    <li>CI as a philosophy: automated guards keep projects honest (passive-only greps, header checks)</li>
+    <li>Documentation-first: READMEs that explain the why, not just the what</li>
+    <li>Privacy by design: no telemetry, no cloud, local-first data</li>
+  </ul>
+
+  <h2>Education & growth</h2>
+  <p>Continuous, self-directed learner — building in public, solving CTF challenges, and writing up what I learn. Full activity history: <a href="https://github.com/navairgap" style="color:var(--a1)">github.com/navairgap</a>.</p>
+</div>
+</body>
+</html>
