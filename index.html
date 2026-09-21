@@ -656,14 +656,46 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
       }`,
   });
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
-  const igeo = new THREE.IcosahedronGeometry(.6, 1);
-  const wire = new THREE.LineSegments(new THREE.WireframeGeometry(igeo),
-    new THREE.LineBasicMaterial({ color: 0xcdc4ba, transparent: true, opacity: .45 }));
-  const nodes = new THREE.Points(igeo, new THREE.PointsMaterial({ color: 0xff5c5c, size: .034, transparent: true, opacity: .9 }));
-  const ico = new THREE.Group();
-  ico.add(wire); ico.add(nodes);
-  ico.position.set(.72, .12, 0);
-  scene.add(ico);
+  /* 4D tesseract — hypercube rotating through the XW/YW planes, cursor-warped */
+  const V4 = [];
+  for (let i = 0; i < 16; i++) V4.push([(i & 1) * 2 - 1, (i & 2) - 1, (i & 4) / 2 - 1, (i & 8) / 4 - 1]);
+  const E4 = [];
+  for (let i = 0; i < 16; i++) for (let j = i + 1; j < 16; j++) {
+    let d = 0;
+    for (let k = 0; k < 4; k++) if (V4[i][k] !== V4[j][k]) d++;
+    if (d === 1) E4.push(i, j);
+  }
+  const tGeo = new THREE.BufferGeometry();
+  tGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(E4.length * 3), 3));
+  const tLines = new THREE.LineSegments(tGeo,
+    new THREE.LineBasicMaterial({ color: 0xcdc4ba, transparent: true, opacity: .5 }));
+  const nGeo = new THREE.BufferGeometry();
+  nGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(16 * 3), 3));
+  const tNodes = new THREE.Points(nGeo,
+    new THREE.PointsMaterial({ color: 0xff5c5c, size: .05, transparent: true, opacity: .95 }));
+  const tessa = new THREE.Group();
+  tessa.add(tLines); tessa.add(tNodes);
+  tessa.position.set(.72, .12, 0);
+  tessa.scale.setScalar(.34);
+  scene.add(tessa);
+  const tp = nGeo.attributes.position.array, tl = tGeo.attributes.position.array;
+  function tessa_update(ax, ay) {
+    const c1 = Math.cos(ax), s1 = Math.sin(ax), c2 = Math.cos(ay), s2 = Math.sin(ay);
+    for (let i = 0; i < 16; i++) {
+      let [x, y, z, w] = V4[i];
+      let x2 = x * c1 - w * s1, w2 = x * s1 + w * c1; x = x2; w = w2;   /* rotate XW plane */
+      let y2 = y * c2 - w * s2; w2 = y * s2 + w * c2; y = y2; w = w2;   /* rotate YW plane */
+      const k = 3.0 / (3.0 - w);                                        /* 4D->3D perspective */
+      tp[i*3] = x * k; tp[i*3+1] = y * k; tp[i*3+2] = z * k;
+    }
+    for (let e = 0; e < E4.length; e++) {
+      const a = E4[e] * 3;
+      tl[e*3] = tp[a]; tl[e*3+1] = tp[a+1]; tl[e*3+2] = tp[a+2];
+    }
+    nGeo.attributes.position.needsUpdate = true;
+    tGeo.attributes.position.needsUpdate = true;
+  }
+  tessa_update(0.8, 0.5);
   function size() {
     const s = Math.min(devicePixelRatio, 1) * (lowPower ? .35 : .55);
     renderer.setSize(innerWidth, innerHeight, false);
@@ -678,17 +710,18 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
   const clock = new THREE.Clock();
   let visible = true, last = 0;
   document.addEventListener("visibilitychange", () => visible = !document.hidden);
-  if (RM) { uni.u_time.value = 12; renderer.render(scene, cam); return; }
+  if (RM) { uni.u_time.value = 12; tessa_update(6.6, 3.8); renderer.render(scene, cam); return; }
   (function loop() {
     requestAnimationFrame(loop);
     const now = performance.now();
     if (!visible || now - last < (lowPower ? 40 : 25)) return;
     last = now;
     uni.u_time.value = clock.getElapsedTime();
-    ico.rotation.y += .005;
-    ico.rotation.x += (uni.u_mouse.value.y - .5 - ico.rotation.x) * .04;
-    ico.position.y = .12 + Math.sin(uni.u_time.value * .8) * .04;
-    ico.visible = innerWidth > 880;
+    tessa_update(uni.u_time.value * .55 + (uni.u_mouse.value.x - .5) * 1.4,
+                 uni.u_time.value * .32 + (uni.u_mouse.value.y - .5) * 1.4);
+    tessa.scale.setScalar(.34 + Math.sin(uni.u_time.value * 1.3) * .02);
+    tessa.position.y = .12 + Math.sin(uni.u_time.value * .8) * .04;
+    tessa.visible = innerWidth > 880;
     renderer.render(scene, cam);
   })();
   function startRain() {
