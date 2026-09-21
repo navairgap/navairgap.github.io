@@ -1120,21 +1120,21 @@ io2.observe(document.getElementById("giant"));
   }, 1000);
   const dock = document.getElementById("dock");
   if (dock) dock.querySelectorAll(".dk").forEach((el) => {
-    const btn = el as HTMLElement;
+    const btn = el;
     btn.addEventListener("mousemove", (e) => {
       const r = btn.getBoundingClientRect();
       const d = Math.abs(e.clientX - (r.left + r.width / 2));
       const s2 = Math.max(1, 1.4 - d / 110);
-      (btn.querySelector("span") as HTMLElement).style.transform = `scale(${s2.toFixed(3)}) translateY(${-(s2 - 1) * 12}px)`;
+      (btn.querySelector("span")).style.transform = `scale(${s2.toFixed(3)}) translateY(${-(s2 - 1) * 12}px)`;
     });
-    btn.addEventListener("mouseleave", () => ((btn.querySelector("span") as HTMLElement).style.transform = ""));
+    btn.addEventListener("mouseleave", () => ((btn.querySelector("span")).style.transform = ""));
   });
   const ids = ["about", "skills", "projects", "journey", "contact"];
   setInterval(() => {
     const y = scrollY + innerHeight * 0.4;
     let cur = "about";
     ids.forEach((id) => { const el = document.getElementById(id); if (el && el.offsetTop <= y) cur = id; });
-    document.querySelectorAll("#dock .dk").forEach((d) => d.classList.toggle("on", (d as HTMLElement).dataset.go === cur));
+    document.querySelectorAll("#dock .dk").forEach((d) => d.classList.toggle("on", (d).dataset.go === cur));
   }, 300);
 })();
 
