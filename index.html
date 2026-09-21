@@ -41,6 +41,7 @@ body { background: var(--black); color: var(--ink); font-family: var(--mono); ov
 .wrap { position: relative; z-index: 1; }
 
 #progress { position: fixed; top: 0; left: 0; height: 2px; width: 0; z-index: 60; background: var(--ink); }
+#flash { position: fixed; inset: 0; background: var(--ink); z-index: 99; opacity: 0; pointer-events: none; }
 
 /* left section spine ・ 源 力 美 道 信 */
 #spine { position: fixed; left: 22px; top: 50%; transform: translateY(-50%); z-index: 40;
@@ -608,11 +609,16 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
       void main(){
         vec2 uv = (gl_FragCoord.xy - .5*u_res)/u_res.y;
         uv += (u_mouse-.5)*.04;
+        /* cursor lens bubble: local spacetime warp around the pointer */
+        vec2 mc = (u_mouse - .5) * vec2(u_res.x/u_res.y, 1.0);
+        float cm = exp(-dot(uv - mc, uv - mc) * 7.0);
+        float ca = cos(cm*.55), sa = sin(cm*.55);
+        uv = mc + mat2(ca, -sa, sa, ca) * (uv - mc);
         float t = u_time;
         float tm = 1.0 + u_scroll*2.5;
         vec3 bh = vec3(0.0, 0.0, 0.0);
         float dist = 3.8 - u_scroll*2.4;
-        vec3 ro = vec3(sin(t*.10)*.12, 0.80 - u_scroll*.20, -dist);
+        vec3 ro = vec3(sin(t*.10)*.12 + sin(u_scroll*2.4)*.3, 0.80 - u_scroll*1.35, -dist);
         vec3 rd = normalize(vec3(uv*1.15, 1.0));
         float rot = t*0.65*tm;
         float cr = cos(rot), sr = sin(rot);
@@ -626,7 +632,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
           if(r < 0.50){ absorbed = true; break; }
           float ring = smoothstep(0.615,0.555,r)*smoothstep(0.485,0.545,r);
           glow += vec3(1.,.97,.90)*ring*(.36 + .09*noise(vec2(t*2.3, r*11.0)));
-          dir = normalize(dir + normalize(to)*(0.23/(r*r+0.05)));
+          dir = normalize(dir + normalize(to)*((0.23 + cm*0.28)/(r*r+0.05)));
           p += dir*max(0.04, r*.14);
           float yd = abs(p.y);
           if(yd < 0.40){
@@ -645,6 +651,8 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
             }
           }
         }
+        float xing = smoothstep(0.14, 0.02, abs(ro.y)) * smoothstep(2.4, 0.7, length(ro.xz - bh.xz));
+        glow += vec3(1.,.98,.93) * xing * 1.1;
         vec3 col = absorbed ? vec3(0.) : skyColor(dir, t);
         col += glow;
         col += glow*glow*.30;
@@ -696,6 +704,67 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
     tGeo.attributes.position.needsUpdate = true;
   }
   tessa_update(0.8, 0.5);
+
+  /* particle universe — NAVAIRGAP assembled from ~2200 drifting particles */
+  let parts_tick = null;
+  if (!RM) document.fonts.ready.then(() => {
+    const N = lowPower ? 1000 : 2200;
+    const cv = document.createElement("canvas"); cv.width = 900; cv.height = 160;
+    const c2 = cv.getContext("2d");
+    c2.fillStyle = "#fff"; c2.font = "700 92px 'JetBrains Mono', monospace";
+    c2.textAlign = "center"; c2.textBaseline = "middle";
+    c2.fillText("NAVAIRGAP", 450, 84);
+    const img = c2.getImageData(0, 0, 900, 160).data;
+    const pts = [];
+    for (let y = 0; y < 160; y += 2) for (let x = 0; x < 900; x += 2)
+      if (img[(y * 900 + x) * 4 + 3] > 128) pts.push([x / 900 * 2.3 - 1.15, -(y / 160 * .44) + .22]);
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(N * 3), col = new Float32Array(N * 3),
+          home = new Float32Array(N * 2), seed = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      const t4 = pts.length ? pts[Math.floor(i / N * pts.length)] : [Math.random() * 2 - 1, Math.random()];
+      home[i*2] = t4[0]; home[i*2+1] = t4[1];
+      pos[i*3] = Math.random() * 2 - 1; pos[i*3+1] = Math.random() * 2 - 1; pos[i*3+2] = .02;
+      const red = Math.random() < .08;
+      col[i*3] = red ? 1 : .80; col[i*3+1] = red ? .36 : .77; col[i*3+2] = red ? .36 : .73;
+      seed[i] = Math.random() * 6.28;
+    }
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    const mat = new THREE.PointsMaterial({ size: 2.4, sizeAttenuation: false, vertexColors: true,
+      transparent: true, opacity: 0, depthTest: false });
+    const pObj = new THREE.Points(geo, mat);
+    pObj.position.set(.12, .18, 0);
+    pObj.renderOrder = 5;
+    scene.add(pObj);
+    let asmStart = 0, mCX = 0, mCY = 0;
+    addEventListener("mousemove", e => {
+      mCX = (e.clientX / innerWidth) * 2 - 1 - pObj.position.x;
+      mCY = -((e.clientY / innerHeight) * 2 - 1) - pObj.position.y;
+    });
+    addEventListener("bootdone", () => { if (!asmStart) asmStart = performance.now(); }, { once: true });
+    setTimeout(() => { if (!asmStart) asmStart = performance.now(); }, 2200);
+    parts_tick = () => {
+      if (!asmStart) return;
+      const asm = Math.min(1, (performance.now() - asmStart) / 2600);
+      const e = 1 - Math.pow(1 - asm, 3);
+      const fade = Math.max(0, 1 - Math.max(0, uni.u_scroll.value - .04) / .10);
+      mat.opacity = e * fade;
+      pObj.visible = mat.opacity > .01;
+      if (!pObj.visible) return;
+      const t = uni.u_time.value;
+      for (let i = 0; i < N; i++) {
+        const hx = home[i*2] * e + Math.sin(t * .5 + seed[i]) * .012;
+        const hy = home[i*2+1] * e + Math.cos(t * .4 + seed[i]) * .012;
+        let x = pos[i*3], y = pos[i*3+1];
+        x += (hx - x) * .07; y += (hy - y) * .07;
+        const ddx = x - mCX, ddy = y - mCY, dd = ddx*ddx + ddy*ddy;
+        if (dd < .015 && dd > 1e-6) { const push = (.015 - dd) * 18 / Math.sqrt(dd); x += ddx * push * .016; y += ddy * push * .016; }
+        pos[i*3] = x; pos[i*3+1] = y;
+      }
+      geo.attributes.position.needsUpdate = true;
+    };
+  });
   function size() {
     const s = Math.min(devicePixelRatio, 1) * (lowPower ? .35 : .55);
     renderer.setSize(innerWidth, innerHeight, false);
@@ -717,11 +786,14 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
     if (!visible || now - last < (lowPower ? 40 : 25)) return;
     last = now;
     uni.u_time.value = clock.getElapsedTime();
+    const us = uni.u_scroll.value;
     tessa_update(uni.u_time.value * .55 + (uni.u_mouse.value.x - .5) * 1.4,
                  uni.u_time.value * .32 + (uni.u_mouse.value.y - .5) * 1.4);
-    tessa.scale.setScalar(.34 + Math.sin(uni.u_time.value * 1.3) * .02);
+    tessa.position.x = .72 - us * 1.15;
+    tessa.scale.setScalar((.34 + Math.sin(uni.u_time.value * 1.3) * .02) * (1.0 + us * .9));
     tessa.position.y = .12 + Math.sin(uni.u_time.value * .8) * .04;
     tessa.visible = innerWidth > 880;
+    if (parts_tick) parts_tick();
     renderer.render(scene, cam);
   })();
   function startRain() {
@@ -749,31 +821,49 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
 /* ================= boot ================= */
 (() => {
   const boot = document.getElementById("boot"), log = document.getElementById("bootlog"),
-        bar = document.querySelector("#bootbar i"), skip = document.getElementById("bootskip");
-  if (localStorage.getItem("booted")) { boot.classList.add("done"); return; }
-  const lines = [
-    ["navairgap.sec — bone-on-black build v9.0", "dim"],
-    ["> ink ramp ................ four tiers OK", ""],
-    ["> grain 5.5% .............. applied", ""],
-    ["> radius 2 ................ no shadow", ""],
-    ["> access granted ・ ようこそ", ""],
+        bar = document.querySelector("#bootbar i"), skip = document.getElementById("bootskip"),
+        flash = document.getElementById("flash");
+  const finish = () => {
+    boot.classList.add("done");
+    localStorage.setItem("booted", "1");
+    flash.style.transition = "none";
+    flash.style.opacity = "1";
+    void flash.offsetWidth;
+    flash.style.transition = "opacity .55s ease-out";
+    flash.style.opacity = "0";
+    setTimeout(() => flash.remove(), 700);
+    dispatchEvent(new Event("bootdone"));
+  };
+  if (localStorage.getItem("booted")) {
+    boot.classList.add("done");
+    flash.remove();
+    setTimeout(() => dispatchEvent(new Event("bootdone")), 60);
+    return;
+  }
+  const stages = [
+    ["navairgap.sec — spooling the singularity", "dim", 4],
+    ["> accreting matter ........ streaming", "", 26],
+    ["> event horizon ........... locked", "", 51],
+    ["> lensing field ........... aligned", "", 78],
+    ["> ignition ................ ようこそ", "", 97],
   ];
   let i = 0;
   const t = setInterval(() => {
-    if (i < lines.length) {
-      const [txt, cls] = lines[i];
+    if (i < stages.length) {
+      const [txt, cls, pct] = stages[i];
       const div = document.createElement("div");
       if (cls) div.className = cls;
       div.textContent = txt;
       log.appendChild(div);
-      bar.style.width = ((i + 1) / lines.length * 100) + "%";
+      bar.style.width = pct + "%";
       i++;
     } else {
       clearInterval(t);
-      setTimeout(() => { boot.classList.add("done"); localStorage.setItem("booted", "1"); }, 450);
+      bar.style.width = "100%";
+      setTimeout(finish, 380);
     }
-  }, 340);
-  skip.onclick = () => { clearInterval(t); boot.classList.add("done"); localStorage.setItem("booted", "1"); };
+  }, 320);
+  skip.onclick = () => { clearInterval(t); finish(); };
 })();
 
 /* ================= live clock ================= */
