@@ -1,4 +1,4 @@
-import{a as n,j as e,C as r,B as l,P as i,m as c}from"./index-BQaccQvP.js";import{S as d,E as o}from"./skills-pzTDUVdG.js";/**
+import{a as n,j as e,C as r,B as l,P as i,m as c}from"./index-DliiGxcq.js";import{S as d,E as o}from"./skills-pzTDUVdG.js";/**
  * @license lucide-react v0.312.0 - ISC
  *
  * This source code is licensed under the ISC license.
