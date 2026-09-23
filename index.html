@@ -399,7 +399,7 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
   <button data-go="contact" title="contact">信 signal</button>
   <span class="mb-right">
     <span style="font-size:11px">防</span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:8px;border:1px solid var(--ink-2);border-radius:2px;position:relative;display:inline-block"><i style="position:absolute;inset:1px;background:var(--grn);border-radius:1px;display:block;width:70%"></i></span>78%</span>
+    <span style="display:flex;align-items:center;gap:4px" id="mb-batt"><span style="width:12px;height:8px;border:1px solid var(--ink-2);border-radius:2px;position:relative;display:inline-block"><i id="mb-batt-fill" style="position:absolute;inset:1px;background:var(--grn);border-radius:1px;display:block;width:70%"></i></span><span id="mb-batt-pct">78%</span></span>
     <span class="mb-clock" id="mb-clock">--:--</span>
   </span>
 </div>
@@ -1119,6 +1119,21 @@ io2.observe(document.getElementById("giant"));
     const c = document.getElementById("mb-clock");
     if (c) c.textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   }, 1000);
+
+  /* live device battery via Battery Status API (Chromium); static fallback elsewhere */
+  const battFill = document.getElementById("mb-batt-fill"), battPct = document.getElementById("mb-batt-pct");
+  if (battFill && battPct && navigator.getBattery) {
+    navigator.getBattery().then((b) => {
+      const upd = () => {
+        const lvl = Math.round(b.level * 100);
+        battFill.style.width = lvl + "%";
+        battPct.textContent = lvl + "%";
+        battFill.style.background = lvl <= 20 ? "var(--red)" : "var(--grn)";
+      };
+      upd();
+      b.addEventListener("levelchange", upd);
+    }).catch(() => {});
+  }
   const dock = document.getElementById("dock");
   if (dock) dock.querySelectorAll(".dk").forEach((el) => {
     const btn = el;
