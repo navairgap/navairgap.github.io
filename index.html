@@ -16,6 +16,7 @@
   --ink-3: rgba(205,196,186,.55);
   --line: rgba(205,196,186,.14);
   --red: #ff5c5c;            /* the one accent — a hanko stamp */
+  --grn: #5ad19a;            /* status green — battery, ok marks */
   --mono: "JetBrains Mono", "DejaVu Sans Mono", monospace;
   --sans: "Inter", system-ui, sans-serif;
   --disp: "Shippori Mincho", "JetBrains Mono", serif;
@@ -1213,7 +1214,8 @@ document.getElementById("copy-email").addEventListener("click", function () {
   const secs = [...document.querySelectorAll("section, .pin-wrap, .hwrap, header")];
   addEventListener("scroll", () => {
     const h = document.documentElement;
-    bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
+    const maxScroll = h.scrollHeight - h.clientHeight;
+    bar.style.width = (maxScroll > 0 ? h.scrollTop / maxScroll * 100 : 0) + "%";
     const y = scrollY + innerHeight * .35;
     let cur = "top";
     secs.forEach(s => { if (s.offsetTop <= y) cur = s.id; });
