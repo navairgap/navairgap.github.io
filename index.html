@@ -251,32 +251,48 @@ app.load("https://my.spline.design/cybermannequin-6Bnb6sbzQm4hmcmYAvpEFfDO/scene
 
 /* scroll: gentle whole-scene rotation + parallax, best-effort (guarded) */
 let scrollT = 0, scrollC = 0;
+const mouse = { x: 0, y: 0, cx: 0, cy: 0 };
 addEventListener("scroll", () => {
   const max = document.documentElement.scrollHeight - innerHeight;
   scrollT = max > 0 ? scrollY / max : 0;
   document.getElementById("prog").style.transform = `scaleX(${scrollT})`;
 }, { passive: true });
+addEventListener("mousemove", (e) => {
+  mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+  mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+});
+
+let mannequin = null;
+function pickMannequin() {
+  // prefer a named object; fall back to the scene root
+  try {
+    for (const name of ["mannequin", "Mannequin", "Cyber", "Model", "Object"]) {
+      const o = app.findObjectByName && app.findObjectByName(name);
+      if (o) { mannequin = o; return; }
+    }
+  } catch (e) {}
+  try { mannequin = app.scene || app._scene || null; } catch (e) { mannequin = null; }
+}
 
 function tick() {
   requestAnimationFrame(tick);
   scrollC += (scrollT - scrollC) * 0.06;
-  if (sceneReady) {
+  mouse.cx += (mouse.x - mouse.cx) * 0.07;
+  mouse.cy += (mouse.y - mouse.cy) * 0.07;
+  if (sceneReady && !mannequin) pickMannequin();
+  if (mannequin) {
     try {
-      const s = app.scene || app._scene;
-      if (s) {
-        s.rotation.y = scrollC * Math.PI * 1.2;
-        s.position.y = -scrollC * 0.8;
-      }
-    } catch (e) { /* rotation unsupported — scene animations still play */ }
+      // follow the pointer (smooth), combined with scroll rotation
+      mannequin.rotation.y = scrollC * Math.PI * 1.2 + mouse.cx * 0.65;
+      mannequin.rotation.x = mouse.cy * 0.3;
+      if (mannequin.position) mannequin.position.y = -scrollC * 0.8;
+    } catch (e) {}
   }
 }
 tick();
 
-/* mouse parallax on the hero type */
-const mouse = { x: 0, y: 0, cx: 0, cy: 0 };
+/* cursor follows pointer (shared `mouse` from the tick block above) */
 addEventListener("mousemove", (e) => {
-  mouse.x = (e.clientX / innerWidth - 0.5) * 2;
-  mouse.y = (e.clientY / innerHeight - 0.5) * 2;
   const cur = document.getElementById("cur");
   cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
 });
