@@ -111,6 +111,9 @@ p.sub b{color:var(--ink);font-weight:500}
 footer{padding:40px 8vw;border-top:1px solid rgba(232,230,223,.12);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:9px;letter-spacing:.18em;color:var(--dim);position:relative;z-index:10;background:rgba(4,5,8,.7)}
 footer b{color:var(--ink)}
 
+.flash{position:fixed;inset:0;z-index:39;pointer-events:none;background:rgba(139,92,255,.10);opacity:0}
+body.glitching .flash{animation:gflash .28s steps(2)}
+@keyframes gflash{0%{opacity:1}40%{opacity:0}60%{opacity:.7}100%{opacity:0}}
 .marquee{overflow:hidden;border-top:1px solid rgba(232,230,223,.12);border-bottom:1px solid rgba(232,230,223,.12);padding:12px 0;white-space:nowrap;position:relative;z-index:10;background:rgba(4,5,8,.6)}
 .marquee div{display:inline-block;animation:mq 26s linear infinite;font-size:10px;letter-spacing:.34em;color:var(--dim)}
 @keyframes mq{to{transform:translateX(-50%)}}
@@ -135,6 +138,7 @@ h2.big{transform:skewY(var(--sk,0deg))}
 <div class="noise"></div>
 <div class="frame"><i></i><i></i><i></i><i></i></div>
 <div class="progress" id="prog"></div>
+<div class="flash"></div>
 <div id="cur"><i></i></div>
 
 <nav class="secnav" id="secnav">
@@ -225,177 +229,50 @@ h2.big{transform:skewY(var(--sk,0deg))}
 
 <footer>
   <span><b>NAVAIRGAP</b> © 2026</span>
-  <span>3D ROBOT — "ROBOT EXPRESSIVE" BY TOMÁS LAULHÉ (CC-BY 4.0)</span>
+  <span>3D — CYBER MANNEQUIN VIA SPLINE</span>
   <span>BUILT BY HAND · NO TEMPLATE</span>
 </footer>
 
-<script type="importmap">
-{"imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-}}
-</script>
 <script type="module">
-import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
-import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { Application } from "https://cdn.jsdelivr.net/npm/@splinetool/runtime@1/+esm";
 
-/* ================= renderer / scene ================= */
 const canvas = document.getElementById("gl");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
-renderer.setSize(innerWidth, innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+const app = new Application(canvas);
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x05060a);
-scene.fog = new THREE.Fog(0x05060a, 6, 16);
+let sceneReady = false;
+app.load("https://my.spline.design/cybermannequin-6Bnb6sbzQm4hmcmYAvpEFfDO/scene.splinecode")
+  .then(() => {
+    sceneReady = true;
+    console.log("[spline] scene ready");
+    const boot = document.getElementById("boot");
+    if (boot && !boot.classList.contains("done")) boot.classList.add("done");
+  })
+  .catch((e) => console.error("[spline] load failed", e));
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.01, 60);
-camera.position.set(0, 0.15, 4.4);
-
-/* environment for PBR */
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
-
-/* lights — neon rig */
-scene.add(new THREE.AmbientLight(0x223344, 0.7));
-const key = new THREE.DirectionalLight(0xbfd4ff, 1.1); key.position.set(3, 4, 5); scene.add(key);
-const rimG = new THREE.PointLight(0x2fbf71, 6, 20); rimG.position.set(-3.4, 1.4, -2.2); scene.add(rimG);
-const rimP = new THREE.PointLight(0x8b5cff, 8, 22); rimP.position.set(3.2, -1.2, -2.6); scene.add(rimP);
-const rimR = new THREE.PointLight(0xff2b3a, 4, 16); rimR.position.set(0.4, 2.8, 2.6); scene.add(rimR);
-
-/* ================= the object: animated robot ================= */
-const group = new THREE.Group();
-scene.add(group);
-let robot = null, mixer = null, activeAction = null;
-const loader = new GLTFLoader();
-loader.load("assets/robot.glb", (g) => {
-  robot = g.scene;
-  const box = new THREE.Box3().setFromObject(robot);
-  const size = box.getSize(new THREE.Vector3());
-  const s = 2.35 / size.y;
-  robot.scale.setScalar(s);
-  box.setFromObject(robot);
-  robot.position.y -= (box.max.y + box.min.y) / 2;
-  robot.traverse((o) => {
-    const m = o;
-    if (m.isMesh && m.material) {
-      m.material.metalness = 0.35;
-      m.material.roughness = 0.5;
-    }
-  });
-  group.add(robot);
-  mixer = new THREE.AnimationMixer(robot);
-  clips = g.animations;
-  playAnim("Idle");
-}, undefined, (e) => console.error("robot load failed", e));
-
-let clips = [];
-function playAnim(name, once = false) {
-  if (!mixer) return;
-  const clip = THREE.AnimationClip.findByName(clips, name);
-  if (!clip) return;
-  const next = mixer.clipAction(clip);
-  next.reset();
-  next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
-  next.clampWhenFinished = once;
-  if (activeAction && activeAction !== next) {
-    next.crossFadeFrom(activeAction, 0.3, false);
-  }
-  next.play();
-  activeAction = next;
-}
-function robotReact() {
-  const picks = ["Wave", "ThumbsUp", "Dance", "Punch", "Jump", "Yes"];
-  const pick = picks[Math.floor(Math.random() * picks.length)];
-  playAnim(pick, true);
-  window.setTimeout(() => playAnim("Idle"), pick === "Dance" ? 2600 : 1600);
-}
-
-
-/* ================= particles + grid ================= */
-const N = 900;
-const pos = new Float32Array(N * 3);
-for (let i = 0; i < N; i++) {
-  pos[i * 3] = (Math.random() - 0.5) * 26;
-  pos[i * 3 + 1] = (Math.random() - 0.5) * 16;
-  pos[i * 3 + 2] = (Math.random() - 0.5) * 18 - 3;
-}
-const pgeo = new THREE.BufferGeometry();
-pgeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-const pts = new THREE.Points(pgeo, new THREE.PointsMaterial({
-  color: 0x8b5cff, size: 0.02, transparent: true, opacity: 0.75, depthWrite: false,
-}));
-scene.add(pts);
-
-const grid = new THREE.GridHelper(40, 80, 0x2fbf71, 0x1a2436);
-grid.position.y = -2.1;
-grid.material.transparent = true;
-grid.material.opacity = 0.28;
-scene.add(grid);
-
-/* neon ring around the object */
-const ring = new THREE.Mesh(
-  new THREE.TorusGeometry(1.75, 0.012, 12, 128),
-  new THREE.MeshBasicMaterial({ color: 0x2fbf71 })
-);
-ring.rotation.x = Math.PI / 2.4;
-scene.add(ring);
-const ring2 = ring.clone();
-ring2.material = new THREE.MeshBasicMaterial({ color: 0x8b5cff });
-ring2.scale.setScalar(1.18);
-ring2.rotation.x = Math.PI / 1.8;
-scene.add(ring2);
-
-/* ================= post-processing ================= */
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.38, 0.4, 0.55);
-composer.addPass(bloom);
-
-const CyberShader = {
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGlitch: { value: 0 }, uVel: { value: 0 }, uRes: { value: new THREE.Vector2(innerWidth, innerHeight) } },
-  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-  fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uTime,uGlitch,uVel; uniform vec2 uRes; varying vec2 vUv;
-    float rnd(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
-    void main(){
-      vec2 uv=vUv;
-      float t=floor(uTime*16.0);
-      float band=step(0.97,rnd(vec2(floor(uv.y*46.0),t)));
-      uv.x+=band*(rnd(vec2(t,7.0))-0.5)*0.12*uGlitch;
-      float sh=0.0012+uVel*0.004+uGlitch*0.007;
-      vec4 c;
-      c.r=texture2D(tDiffuse,uv+vec2(sh,0.0)).r;
-      c.g=texture2D(tDiffuse,uv).g;
-      c.b=texture2D(tDiffuse,uv-vec2(sh,0.0)).b;
-      c.a=1.0;
-      c.rgb*=0.90+0.10*sin(uv.y*uRes.y*1.6);
-      c.rgb+=(rnd(uv+fract(uTime))-0.5)*0.05;
-      float d=distance(uv,vec2(0.5));
-      c.rgb*=smoothstep(0.95,0.32,d);
-      gl_FragColor=c;
-    }`,
-};
-const cyber = new ShaderPass(CyberShader);
-composer.addPass(cyber);
-composer.addPass(new OutputPass());
-
-/* ================= scroll / mouse state ================= */
-let scrollT = 0, scrollC = 0, lastScroll = 0, glitch = 0;
+/* scroll: gentle whole-scene rotation + parallax, best-effort (guarded) */
+let scrollT = 0, scrollC = 0;
 addEventListener("scroll", () => {
   const max = document.documentElement.scrollHeight - innerHeight;
   scrollT = max > 0 ? scrollY / max : 0;
   document.getElementById("prog").style.transform = `scaleX(${scrollT})`;
 }, { passive: true });
 
+function tick() {
+  requestAnimationFrame(tick);
+  scrollC += (scrollT - scrollC) * 0.06;
+  if (sceneReady) {
+    try {
+      const s = app.scene || app._scene;
+      if (s) {
+        s.rotation.y = scrollC * Math.PI * 1.2;
+        s.position.y = -scrollC * 0.8;
+      }
+    } catch (e) { /* rotation unsupported — scene animations still play */ }
+  }
+}
+tick();
+
+/* mouse parallax on the hero type */
 const mouse = { x: 0, y: 0, cx: 0, cy: 0 };
 addEventListener("mousemove", (e) => {
   mouse.x = (e.clientX / innerWidth - 0.5) * 2;
@@ -403,80 +280,29 @@ addEventListener("mousemove", (e) => {
   const cur = document.getElementById("cur");
   cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
 });
+(function par(){ requestAnimationFrame(par);
+  mouse.cx += (mouse.x - mouse.cx) * .06; mouse.cy += (mouse.y - mouse.cy) * .06;
+  document.querySelectorAll("h1.mega").forEach(el => { el.style.transform = `translate(${mouse.cx*-10}px,${mouse.cy*-6}px)`; });
+})();
+
 document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
   el.addEventListener("mouseenter", () => document.getElementById("cur").classList.add("hot"));
   el.addEventListener("mouseleave", () => document.getElementById("cur").classList.remove("hot"));
 });
 
-/* click the robot -> it reacts */
-const ray = new THREE.Raycaster();
-addEventListener("pointerdown", (e) => {
-  if (!robot) return;
-  ray.setFromCamera(new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
-  if (ray.intersectObject(robot, true).length) { robotReact(); glitch = Math.min(1, glitch + 0.6); }
-});
-
-/* section observer -> nav + glitch burst */
+/* section observer -> nav highlight + css glitch flash */
 const links = document.querySelectorAll("#secnav a");
 const io = new IntersectionObserver((es) => {
   es.forEach((e) => {
     if (e.isIntersecting) {
       links.forEach((l) => l.classList.toggle("on", l.getAttribute("href") === "#" + e.target.id));
-      glitch = Math.min(1, glitch + 0.85);
+      document.body.classList.remove("glitching");
+      void document.body.offsetWidth;
+      document.body.classList.add("glitching");
     }
   });
 }, { threshold: 0.45 });
 document.querySelectorAll("section").forEach((s) => io.observe(s));
-
-/* ================= main loop ================= */
-const clock = new THREE.Clock();
-function tick() {
-  requestAnimationFrame(tick);
-  const t = clock.getElapsedTime();
-  const dt = Math.min(clock.getDelta() || 0.016, 0.05);
-
-  scrollC += (scrollT - scrollC) * 0.07;
-  const vel = Math.min(Math.abs(scrollT - lastScroll) * 60, 1);
-  lastScroll += (scrollT - lastScroll) * 0.2;
-  glitch *= 0.92;
-
-  if (robot) {
-    robot.rotation.y = scrollC * Math.PI * 2.1 + t * 0.1;
-    group.rotation.x = Math.sin(scrollC * Math.PI) * 0.12 + mouse.cy * 0.06;
-    group.rotation.z = mouse.cx * -0.04;
-  }
-  if (mixer) mixer.update(1 / 60);
-  mouse.cx += (mouse.x - mouse.cx) * 0.06;
-  mouse.cy += (mouse.y - mouse.cy) * 0.06;
-  group.position.x = mouse.cx * 0.25;
-  group.position.y = -scrollC * 0.6 + mouse.cy * -0.15;
-
-  camera.position.z = 4.4 - scrollC * 1.7;
-  camera.position.x = mouse.cx * 0.35;
-  camera.position.y = 0.15 + mouse.cy * -0.2 - scrollC * 0.3;
-  camera.lookAt(0, group.position.y * 0.6, 0);
-
-  ring.rotation.z = t * 0.25;
-  ring2.rotation.z = -t * 0.18;
-  pts.rotation.y = t * 0.02 + scrollC * 0.6;
-  grid.position.z = (scrollC * 14) % 1;
-
-  cyber.uniforms.uTime.value = t;
-  cyber.uniforms.uGlitch.value = glitch;
-  cyber.uniforms.uVel.value = vel;
-
-  composer.render();
-  void dt;
-}
-tick();
-
-addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  composer.setSize(innerWidth, innerHeight);
-  cyber.uniforms.uRes.value.set(innerWidth, innerHeight);
-});
 </script>
 
 <script>
