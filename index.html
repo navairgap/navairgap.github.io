@@ -116,6 +116,9 @@ footer b{color:var(--ink)}
 @keyframes mq{to{transform:translateX(-50%)}}
 .marquee b{color:var(--grn);font-weight:400}
 
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+h2.big{transform:skewY(var(--sk,0deg))}
 @media(max-width:860px){
   .cards{grid-template-columns:1fr}
   .row{grid-template-columns:44px 1fr;row-gap:6px}
@@ -222,7 +225,7 @@ footer b{color:var(--ink)}
 
 <footer>
   <span><b>NAVAIRGAP</b> © 2026</span>
-  <span>3D OBJECT — DAMAGED HELMET BY THEBLUETURTLE_ / KHRONOS GLTF SAMPLES</span>
+  <span>3D ROBOT — "ROBOT EXPRESSIVE" BY TOMÁS LAULHÉ (CC-BY 4.0)</span>
   <span>BUILT BY HAND · NO TEMPLATE</span>
 </footer>
 
@@ -264,24 +267,58 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture
 /* lights — neon rig */
 scene.add(new THREE.AmbientLight(0x223344, 0.7));
 const key = new THREE.DirectionalLight(0xbfd4ff, 1.1); key.position.set(3, 4, 5); scene.add(key);
-const rimG = new THREE.PointLight(0x2fbf71, 22, 20); rimG.position.set(-3.4, 1.4, -2.2); scene.add(rimG);
-const rimP = new THREE.PointLight(0x8b5cff, 26, 22); rimP.position.set(3.2, -1.2, -2.6); scene.add(rimP);
-const rimR = new THREE.PointLight(0xff2b3a, 10, 16); rimR.position.set(0.4, 2.8, 2.6); scene.add(rimR);
+const rimG = new THREE.PointLight(0x2fbf71, 6, 20); rimG.position.set(-3.4, 1.4, -2.2); scene.add(rimG);
+const rimP = new THREE.PointLight(0x8b5cff, 8, 22); rimP.position.set(3.2, -1.2, -2.6); scene.add(rimP);
+const rimR = new THREE.PointLight(0xff2b3a, 4, 16); rimR.position.set(0.4, 2.8, 2.6); scene.add(rimR);
 
-/* ================= the object ================= */
+/* ================= the object: animated robot ================= */
 const group = new THREE.Group();
 scene.add(group);
-let helmet = null;
-new GLTFLoader().load("assets/helmet.glb", (g) => {
-  helmet = g.scene;
-  const box = new THREE.Box3().setFromObject(helmet);
+let robot = null, mixer = null, activeAction = null;
+const loader = new GLTFLoader();
+loader.load("assets/robot.glb", (g) => {
+  robot = g.scene;
+  const box = new THREE.Box3().setFromObject(robot);
   const size = box.getSize(new THREE.Vector3());
-  const s = 2.1 / Math.max(size.x, size.y, size.z);
-  helmet.scale.setScalar(s);
-  box.setFromObject(helmet);
-  helmet.position.y -= (box.max.y + box.min.y) / 2;
-  group.add(helmet);
-}, undefined, (e) => console.error("helmet load failed", e));
+  const s = 2.35 / size.y;
+  robot.scale.setScalar(s);
+  box.setFromObject(robot);
+  robot.position.y -= (box.max.y + box.min.y) / 2;
+  robot.traverse((o) => {
+    const m = o;
+    if (m.isMesh && m.material) {
+      m.material.metalness = 0.35;
+      m.material.roughness = 0.5;
+    }
+  });
+  group.add(robot);
+  mixer = new THREE.AnimationMixer(robot);
+  clips = g.animations;
+  playAnim("Idle");
+}, undefined, (e) => console.error("robot load failed", e));
+
+let clips = [];
+function playAnim(name, once = false) {
+  if (!mixer) return;
+  const clip = THREE.AnimationClip.findByName(clips, name);
+  if (!clip) return;
+  const next = mixer.clipAction(clip);
+  next.reset();
+  next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+  next.clampWhenFinished = once;
+  if (activeAction && activeAction !== next) {
+    next.crossFadeFrom(activeAction, 0.3, false);
+  }
+  next.play();
+  activeAction = next;
+}
+function robotReact() {
+  const picks = ["Wave", "ThumbsUp", "Dance", "Punch", "Jump", "Yes"];
+  const pick = picks[Math.floor(Math.random() * picks.length)];
+  playAnim(pick, true);
+  window.setTimeout(() => playAnim("Idle"), pick === "Dance" ? 2600 : 1600);
+}
+
 
 /* ================= particles + grid ================= */
 const N = 900;
@@ -320,7 +357,7 @@ scene.add(ring2);
 /* ================= post-processing ================= */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.85, 0.55, 0.22);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.38, 0.4, 0.55);
 composer.addPass(bloom);
 
 const CyberShader = {
@@ -371,6 +408,14 @@ document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
   el.addEventListener("mouseleave", () => document.getElementById("cur").classList.remove("hot"));
 });
 
+/* click the robot -> it reacts */
+const ray = new THREE.Raycaster();
+addEventListener("pointerdown", (e) => {
+  if (!robot) return;
+  ray.setFromCamera(new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+  if (ray.intersectObject(robot, true).length) { robotReact(); glitch = Math.min(1, glitch + 0.6); }
+});
+
 /* section observer -> nav + glitch burst */
 const links = document.querySelectorAll("#secnav a");
 const io = new IntersectionObserver((es) => {
@@ -395,12 +440,12 @@ function tick() {
   lastScroll += (scrollT - lastScroll) * 0.2;
   glitch *= 0.92;
 
-  if (helmet) {
-    helmet.rotation.y = scrollC * Math.PI * 2.3 + t * 0.12;
-    helmet.rotation.x = Math.sin(scrollC * Math.PI) * 0.35 + mouse.cy * 0.12;
-    helmet.rotation.z = mouse.cx * -0.08;
-    helmet.position.y += Math.sin(t * 0.8) * 0.0012;
+  if (robot) {
+    robot.rotation.y = scrollC * Math.PI * 2.1 + t * 0.1;
+    group.rotation.x = Math.sin(scrollC * Math.PI) * 0.12 + mouse.cy * 0.06;
+    group.rotation.z = mouse.cx * -0.04;
   }
+  if (mixer) mixer.update(1 / 60);
   mouse.cx += (mouse.x - mouse.cx) * 0.06;
   mouse.cy += (mouse.y - mouse.cy) * 0.06;
   group.position.x = mouse.cx * 0.25;
@@ -435,6 +480,55 @@ addEventListener("resize", () => {
 </script>
 
 <script>
+/* ================= text animations ================= */
+/* hover scramble */
+const POOL = "!<>-_\\/[]{}=+*^?#";
+function scramble(el) {
+  if (el.dataset.busy) return;
+  el.dataset.busy = "1";
+  const orig = el.dataset.orig || (el.dataset.orig = el.textContent);
+  let frame = 0;
+  const dur = 16;
+  clearInterval(el._si);
+  el._si = setInterval(() => {
+    frame++;
+    const reveal = Math.floor((frame / dur) * orig.length);
+    let out = "";
+    for (let i = 0; i < orig.length; i++) {
+      out += i < reveal ? orig[i] : (orig[i] === " " ? " " : POOL[Math.floor(Math.random() * POOL.length)]);
+    }
+    el.textContent = out;
+    if (frame >= dur) { clearInterval(el._si); el.textContent = orig; delete el.dataset.busy; }
+  }, 30);
+}
+document.querySelectorAll(".row .t, .tline, .clink, #secnav a, .k").forEach((el) => {
+  el.addEventListener("mouseenter", () => scramble(el));
+});
+
+/* scroll reveal — staggered per section */
+document.querySelectorAll("section").forEach((sec) => {
+  const items = sec.querySelectorAll(".k, h1.mega, .hero-line, .meta-row div, h2.big, p.sub, .tline, .card, .row, .clink");
+  items.forEach((el, i) => {
+    el.classList.add("rv");
+    el.style.transitionDelay = (i * 65) + "ms";
+  });
+});
+const rio = new IntersectionObserver((es) => {
+  es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll(".rv").forEach((el) => rio.observe(el));
+
+/* velocity skew on big headings */
+let skewV = 0;
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const target = max > 0 ? scrollY / max : 0;
+  skewV = Math.min(Math.abs(target - scrollT) * 260, 6) * (target > scrollT ? 1 : -1);
+  clearTimeout(window.__sk);
+  window.__sk = setTimeout(() => (skewV = 0), 90);
+  document.querySelectorAll("h2.big").forEach((h) => h.style.setProperty("--sk", skewV.toFixed(2) + "deg"));
+}, { passive: true });
+
 /* ================= terminal boot ================= */
 (function(){
   const lines = [
