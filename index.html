@@ -3,459 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>navairgap — defense is offense, inverted</title>
-<meta name="description" content="navairgap — cybersecurity × backend. security tools, CTF research, systems.">
+<title>NAVAIRGAP — defense is offense, inverted</title>
+<meta name="description" content="navairgap — cybersecurity × backend. security tools, systems, CTF research.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2317171a'/><path d='M28 72 L50 28 L72 72 Z' fill='none' stroke='%23e8590c' stroke-width='7'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2305060a'/><path d='M28 74 L50 26 L72 74 Z' fill='none' stroke='%232fbf71' stroke-width='8'/></svg>">
 <style>
 :root{
-  --bg:#e9e7e2; --card:#f7f5f1; --card2:#efede8; --ink:#17171a; --ink2:#57534a;
-  --line:#d3d0c7; --line2:#c3c0b6; --acc:#e8590c; --acc-soft:#f3a06a; --red:#e03131;
-  --mono:"JetBrains Mono",ui-monospace,monospace; --sans:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --bg:#05060a; --ink:#e8e6df; --dim:#8a8a96; --grn:#2fbf71; --pur:#8b5cff; --red:#ff2b3a;
+  --mono:"JetBrains Mono",ui-monospace,monospace; --disp:"Archivo Black",Impact,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
-::selection{background:var(--acc);color:#fff}
-a{color:inherit;text-decoration:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--mono);overflow-x:hidden;cursor:none}
+::selection{background:var(--grn);color:#05060a}
+a{color:inherit;text-decoration:none;cursor:none}
+@media(pointer:coarse){body,a{cursor:auto}}
 
-/* ============================ top bar ============================ */
-.bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
-  padding:14px 28px;background:rgba(233,231,226,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
-.brand svg{display:block}
-.nav{display:flex;gap:26px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2)}
-.nav a{position:relative;padding:4px 0}
-.nav a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--acc);transition:width .25s}
-.nav a:hover{color:var(--ink)}
-.nav a:hover::after{width:100%}
-.tag{font-family:var(--mono);font-size:11px;color:var(--ink2);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;display:flex;align-items:center;gap:7px;background:var(--card)}
-.tag i{width:6px;height:6px;border-radius:50%;background:#2fbf71;display:inline-block;animation:blink 2s infinite}
-@keyframes blink{50%{opacity:.35}}
+/* ---------- fixed WebGL canvas ---------- */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
 
-/* ============================ hero ============================ */
-.hero{position:relative;min-height:100vh;padding:120px 40px 80px;overflow:hidden}
-#pcb{position:absolute;inset:0;width:100%;height:100%;z-index:0}
-.hero-grid{position:relative;z-index:2;max-width:1280px;margin:0 auto;display:grid;grid-template-columns:250px 1fr 280px;gap:36px;align-items:center;min-height:calc(100vh - 220px)}
+/* ---------- HUD overlays ---------- */
+.scan{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.noise{position:fixed;inset:0;z-index:41;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
+.frame{position:fixed;inset:14px;z-index:42;pointer-events:none}
+.frame i{position:absolute;width:22px;height:22px;border:2px solid rgba(232,230,223,.5)}
+.frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+.frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+.frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+.frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+.progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:60;transform-origin:0 50%;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--grn),var(--pur),var(--red))}
+.secnav{position:fixed;left:22px;top:50%;transform:translateY(-50%);z-index:45;display:flex;flex-direction:column;gap:14px}
+.secnav a{font-size:9px;letter-spacing:.2em;color:var(--dim);display:flex;align-items:center;gap:8px;transition:color .2s}
+.secnav a::before{content:"";width:14px;height:1px;background:var(--dim);transition:all .25s}
+.secnav a.on{color:var(--grn)}
+.secnav a.on::before{width:26px;background:var(--grn)}
 
-/* embossed white card language */
-.ecard{background:linear-gradient(180deg,#faf8f4,#eeece7);border:1px solid var(--line);border-radius:10px;
-  box-shadow:inset 0 1px 0 #fff,0 14px 34px rgba(23,23,26,.09),0 3px 8px rgba(23,23,26,.05)}
-.chip{display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;font-weight:600;letter-spacing:.01em}
-.chip .ic{width:34px;height:34px;border-radius:7px;border:1px solid var(--line2);background:#fff;display:grid;place-items:center;flex:none}
-.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--red);margin-left:auto;flex:none;box-shadow:0 0 0 3px rgba(224,49,49,.14)}
-.chip small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--ink2);margin-top:2px;letter-spacing:.05em}
+/* custom cursor */
+#cur{position:fixed;z-index:100;width:34px;height:34px;pointer-events:none;transform:translate(-50%,-50%);transition:width .18s,height .18s}
+#cur::before,#cur::after{content:"";position:absolute;background:var(--grn);opacity:.9}
+#cur::before{left:50%;top:0;width:1px;height:100%;transform:translateX(-50%)}
+#cur::after{top:50%;left:0;height:1px;width:100%;transform:translateY(-50%)}
+#cur i{position:absolute;inset:8px;border:1px solid rgba(47,191,113,.7);border-radius:50%;transition:inset .18s}
+#cur.hot i{inset:2px;border-color:var(--red)}
+@media(pointer:coarse){#cur{display:none}}
 
-/* main feature card */
-.feature{position:relative;padding:26px 28px 24px;max-width:560px;margin:0 auto}
-.feature .row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
-.leds{display:flex;gap:5px}
-.leds i{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:inset 0 -1px 2px rgba(0,0,0,.35)}
-.leds i:nth-child(2){background:#f08c00}
-.leds i:nth-child(3){background:#2fbf71}
-.feature h1{font-size:clamp(30px,3.6vw,44px);line-height:1.02;letter-spacing:-.025em;font-weight:800;text-transform:uppercase}
-.feature h1 span{color:var(--acc)}
-.feature p.lede{margin:16px 0 22px;color:var(--ink2);font-size:14.5px;line-height:1.55;max-width:42ch}
-.ledbar{background:#1c1c1f;border-radius:6px;color:#f1f1f3;font-family:var(--mono);font-size:12.5px;
-  display:flex;align-items:center;gap:12px;padding:12px 14px;letter-spacing:.1em;border:1px solid #0c0c0e;
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
-.ledbar .arr{color:#8a8a92;cursor:pointer;user-select:none}
-.ledbar .lbl{flex:1;text-align:center;transition:opacity .3s}
-.ledbar .lbl b{color:var(--acc-soft);font-weight:500}
-.ledbar .cur{width:8px;height:14px;background:var(--acc);opacity:.85;animation:blink 1.1s steps(1) infinite}
-.feature .hex{opacity:.9}
-.btnrow{display:flex;gap:12px;margin-top:18px}
-.btn{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:11px 18px;border-radius:7px;
-  border:1px solid var(--ink);background:var(--ink);color:#f5f3ee;cursor:pointer;transition:transform .15s,box-shadow .15s;display:inline-block}
-.btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,23,26,.22)}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line2)}
-.btn.ghost:hover{border-color:var(--ink)}
+/* ---------- boot overlay ---------- */
+#boot{position:fixed;inset:0;z-index:90;background:#04050 8;background:#040508;display:flex;align-items:center;justify-content:center;transition:opacity .7s}
+#boot.done{opacity:0;pointer-events:none}
+#boot pre{font-size:12px;line-height:1.9;color:var(--grn);width:min(560px,86vw);white-space:pre-wrap;text-shadow:0 0 8px rgba(47,191,113,.5)}
+#boot .skip{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;color:var(--dim);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+#boot pre .p{color:var(--pur)} #boot pre .r{color:var(--red)}
 
-/* right rail */
-.rail .rcard{padding:20px;margin-bottom:16px}
-.rcard h3{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--ink2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.rcard h3::before{content:"";width:8px;height:8px;background:var(--acc);display:inline-block}
-.rcard p{font-size:13px;line-height:1.6;color:var(--ink2)}
-.rcard a.go{font-family:var(--mono);font-size:11.5px;color:var(--acc);letter-spacing:.05em;display:inline-block;margin-top:10px;border-bottom:1px solid transparent}
-.rcard a.go:hover{border-bottom-color:var(--acc)}
+/* ---------- content ---------- */
+main{position:relative;z-index:10}
+section{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:14vh 8vw}
+.k{font-size:10px;letter-spacing:.34em;color:var(--grn);text-transform:uppercase;margin-bottom:22px}
+.k::before{content:"[ "}.k::after{content:" ]"}
 
-/* floating chips over the PCB */
-.floaty{position:absolute;z-index:1;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink2);
-  background:linear-gradient(180deg,#f8f6f2,#eceae5);border:1px solid var(--line);border-radius:6px;padding:7px 12px;
-  box-shadow:0 6px 16px rgba(23,23,26,.08);display:flex;gap:8px;align-items:center}
-.floaty i{width:6px;height:6px;border-radius:50%;background:var(--acc);display:inline-block}
-.f1{top:16%;left:6%}.f2{top:12%;right:8%}.f3{bottom:20%;left:10%}.f4{bottom:16%;right:6%}
+h1.mega{font-family:var(--disp);font-size:clamp(52px,11vw,150px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase}
+h1.mega .o{color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+h1.mega .g{color:var(--grn);text-shadow:0 0 34px rgba(47,191,113,.45)}
+h2.big{font-family:var(--disp);font-size:clamp(30px,5.4vw,68px);line-height:1;text-transform:uppercase;margin-bottom:26px}
+h2.big em{font-style:normal;color:var(--pur);text-shadow:0 0 28px rgba(139,92,255,.5)}
+p.sub{color:var(--dim);font-size:13px;line-height:1.9;max-width:52ch}
+p.sub b{color:var(--ink);font-weight:500}
 
-/* receipt */
-.receipt{position:relative;z-index:2;width:220px;margin:26px auto 0;background:#fff;padding:18px 18px 26px;
-  font-family:var(--mono);font-size:11px;line-height:1.7;color:#333;transform:rotate(-1.6deg);
-  box-shadow:0 10px 24px rgba(23,23,26,.14);text-align:center}
-.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-9px;height:10px;
-  background:linear-gradient(-45deg,#fff 5px,transparent 0),linear-gradient(45deg,#fff 5px,transparent 0);
-  background-size:12px 12px;background-repeat:repeat-x}
-.receipt b{letter-spacing:.14em}
-.receipt .rline{border-top:1px dashed #bbb;margin:8px 0}
-.receipt .acc{color:var(--acc)}
+.hero-line{margin-top:26px;font-size:12px;color:var(--grn)}
+.hero-line::after{content:"▌";animation:blink 1s infinite;color:var(--grn)}
+.meta-row{display:flex;gap:38px;margin-top:44px;flex-wrap:wrap}
+.meta-row div{font-size:10px;letter-spacing:.14em;color:var(--dim);line-height:2}
+.meta-row b{display:block;color:var(--ink);font-weight:500;font-size:12px}
+.scroll-cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.4em;color:var(--dim)}
+.scroll-cue::after{content:"";display:block;width:1px;height:44px;margin:12px auto 0;background:linear-gradient(var(--grn),transparent);animation:drop 1.6s infinite}
+@keyframes drop{from{transform:scaleY(0);transform-origin:top}to{transform:scaleY(1);transform-origin:top}}
 
-/* ============================ sections ============================ */
-.wrap{max-width:1280px;margin:0 auto;padding:90px 40px}
-.seclabel{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
-.seclabel::before{content:"// "}
-h2.title{font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:34px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{padding:24px;position:relative}
-.card .num{font-family:var(--mono);font-size:11px;color:var(--acc);letter-spacing:.1em;margin-bottom:12px}
-.card h4{font-size:16px;font-weight:700;margin-bottom:8px}
-.card p{font-size:13.5px;color:var(--ink2);line-height:1.6}
-.card ul{margin-top:12px;list-style:none;font-family:var(--mono);font-size:11.5px;color:var(--ink2)}
-.card ul li{padding:5px 0;border-top:1px dashed var(--line2)}
-.card ul li::before{content:"▸ ";color:var(--acc)}
+.rows{border-top:1px solid rgba(232,230,223,.14)}
+.row{display:grid;grid-template-columns:70px 1fr auto auto;gap:22px;align-items:center;padding:24px 8px;border-bottom:1px solid rgba(232,230,223,.14);transition:background .2s,padding-left .25s;position:relative}
+.row:hover{background:rgba(139,92,255,.06);padding-left:22px}
+.row .n{font-size:10px;color:var(--dim)}
+.row .t{font-family:var(--disp);font-size:clamp(17px,2.4vw,28px);text-transform:uppercase;letter-spacing:.01em}
+.row:hover .t{color:var(--grn)}
+.row .d{font-size:10px;color:var(--dim);letter-spacing:.1em}
+.row .a{font-size:11px;color:var(--pur)}
+.row::after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;background:var(--grn);transition:width .35s}
+.row:hover::after{width:100%}
 
-.prow{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-.prog{padding:0;overflow:hidden}
-.prog .top{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px}
-.prog .top i{width:7px;height:7px;border-radius:50%;background:var(--red);flex:none}
-.prog .top i.g{background:#2fbf71}
-.prog .body{padding:18px}
-.prog h4{font-size:17px;font-weight:700;margin-bottom:6px}
-.prog p{font-size:13px;color:var(--ink2);line-height:1.55}
-.prog .meta{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink2);display:flex;gap:14px;flex-wrap:wrap}
-.prog .meta b{color:var(--acc);font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:10px}
+.card{border:1px solid rgba(232,230,223,.16);padding:24px 22px;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);transition:border-color .25s,transform .25s}
+.card:hover{border-color:var(--grn);transform:translateY(-4px)}
+.card h4{font-size:12px;letter-spacing:.2em;color:var(--ink);margin-bottom:14px;display:flex;justify-content:space-between}
+.card h4 i{color:var(--red);font-style:normal}
+.card li{list-style:none;font-size:11px;color:var(--dim);padding:6px 0;border-top:1px dashed rgba(232,230,223,.14)}
+.card li::before{content:"▸ ";color:var(--grn)}
 
-/* contact */
-.contact{background:#141416;color:#e8e4da;padding:90px 40px;border-top:3px solid var(--acc)}
-.contact .wrap{padding:0}
-.contact h2{color:#f5f2ea}
-.contact .grid3{margin-top:10px}
-.contact .card{background:#1d1d21;border-color:#2c2c31;color:#cfcbc2}
-.contact .card h4{color:#f5f2ea}
-.contact .card p{color:#9b978d}
-.contact .card ul li{border-top-color:#2c2c31}
-.contact a:hover{color:var(--acc-soft)}
-.foot{margin-top:60px;padding-top:22px;border-top:1px solid #2c2c31;font-family:var(--mono);font-size:11px;color:#77736a;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.foot b{color:#b9b4a8;font-weight:500}
+.tline{font-family:var(--disp);font-size:clamp(24px,4.6vw,58px);line-height:1.14;text-transform:uppercase;color:transparent;-webkit-text-stroke:1px rgba(232,230,223,.75);transition:color .3s}
+.tline:hover{color:var(--ink);-webkit-text-stroke:1px transparent}
 
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s,transform .6s}
-.reveal.in{opacity:1;transform:none}
+.contact-links{display:flex;gap:18px;margin-top:34px;flex-wrap:wrap}
+.clink{border:1px solid rgba(232,230,223,.25);padding:14px 22px;font-size:11px;letter-spacing:.16em;transition:all .2s;background:rgba(5,6,10,.5)}
+.clink:hover{border-color:var(--grn);color:var(--grn);box-shadow:0 0 24px rgba(47,191,113,.25)}
+footer{padding:40px 8vw;border-top:1px solid rgba(232,230,223,.12);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:9px;letter-spacing:.18em;color:var(--dim);position:relative;z-index:10;background:rgba(4,5,8,.7)}
+footer b{color:var(--ink)}
 
-@media(max-width:1024px){.hero-grid{grid-template-columns:1fr;gap:22px}.floaty{display:none}}
-@media(max-width:860px){.grid3,.prow{grid-template-columns:1fr}.nav{display:none}.wrap{padding:64px 22px}.hero{padding:100px 20px 60px}}
+.marquee{overflow:hidden;border-top:1px solid rgba(232,230,223,.12);border-bottom:1px solid rgba(232,230,223,.12);padding:12px 0;white-space:nowrap;position:relative;z-index:10;background:rgba(4,5,8,.6)}
+.marquee div{display:inline-block;animation:mq 26s linear infinite;font-size:10px;letter-spacing:.34em;color:var(--dim)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.marquee b{color:var(--grn);font-weight:400}
+
+@media(max-width:860px){
+  .cards{grid-template-columns:1fr}
+  .row{grid-template-columns:44px 1fr;row-gap:6px}
+  .row .d,.row .a{display:none}
+  .secnav{display:none}
+  section{padding:14vh 7vw}
+}
 </style>
 </head>
 <body>
-<!-- ============================ TOP BAR ============================ -->
-<header class="bar">
-  <a class="brand" href="#top">
-    <svg width="22" height="22" viewBox="0 0 100 100"><path d="M28 74 L50 26 L72 74 Z" fill="none" stroke="#17171a" stroke-width="9"/><path d="M40 74 L50 52 L60 74 Z" fill="#e8590c"/></svg>
-    navairgap
-  </a>
-  <nav class="nav">
-    <a href="#about">About</a>
-    <a href="#skills">Skills</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-  </nav>
-  <span class="tag"><i></i>open to opportunities</span>
-</header>
 
-<!-- ============================ HERO ============================ -->
-<section class="hero" id="top">
-  <svg id="pcb" preserveAspectRatio="none"></svg>
+<canvas id="gl"></canvas>
+<div class="scan"></div>
+<div class="noise"></div>
+<div class="frame"><i></i><i></i><i></i><i></i></div>
+<div class="progress" id="prog"></div>
+<div id="cur"><i></i></div>
 
-  <div class="floaty f1"><i></i>SENTINELWIFI</div>
-  <div class="floaty f2"><i></i>PORTWARDEN</div>
-  <div class="floaty f3"><i></i>TLS-PROBE</div>
-  <div class="floaty f4"><i></i>HONEYPOT-LITE</div>
+<nav class="secnav" id="secnav">
+  <a href="#s0" class="on">BOOT</a>
+  <a href="#s1">IDENT</a>
+  <a href="#s2">ARSENAL</a>
+  <a href="#s3">OPS</a>
+  <a href="#s4">UPLINK</a>
+</nav>
 
-  <div class="hero-grid">
-    <!-- left rail -->
-    <div>
-      <div class="chip ecard">
-        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#17171a" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></span>
-        <span>Security Tools<small>offensive × defensive</small></span><span class="dot"></span>
-      </div>
-      <div class="chip ecard">
-        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#17171a" stroke-width="2"><path d="M4 17l6-6 4 4 6-8"/><path d="M4 21h16"/></svg></span>
-        <span>CTF &amp; Research<small>writeups · pwn · crypto</small></span><span class="dot"></span>
-      </div>
-      <div class="chip ecard">
-        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#17171a" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
-        <span>Backend Systems<small>rust · python · c</small></span><span class="dot"></span>
-      </div>
-    </div>
+<div id="boot">
+  <pre id="bootlog"></pre>
+  <div class="skip">[ CLICK TO SKIP ]</div>
+</div>
 
-    <!-- main feature card -->
-    <div>
-      <div class="feature ecard">
-        <div class="row">
-          <div class="leds"><i></i><i></i><i></i></div>
-          <svg class="hex" width="26" height="26" viewBox="0 0 100 100"><path d="M28 74 L50 26 L72 74 Z" fill="none" stroke="#17171a" stroke-width="8"/><path d="M40 74 L50 52 L60 74 Z" fill="#e8590c"/></svg>
-        </div>
-        <h1>The Defense<br><span>Computer</span></h1>
-        <p class="lede">The only security stack your vector retrieval pipeline needs. Cybersecurity × backend — depth over breadth, systems over scripts.</p>
-        <div class="ledbar">
-          <span class="arr" onclick="cycle(-1)">◀</span>
-          <span class="lbl" id="ledlabel"><b>SENTINELWIFI</b> — wifi deauth detector</span>
-          <span class="cur"></span>
-          <span class="arr" onclick="cycle(1)">▶</span>
-        </div>
-        <div class="btnrow">
-          <a class="btn" href="https://github.com/navairgap" target="_blank" rel="noopener">GitHub ↗</a>
-          <a class="btn ghost" href="/os/">Enter the OS</a>
-        </div>
-      </div>
+<main>
+  <section id="s0">
+    <div class="k">nav54877 // secure shell v2.6</div>
+    <h1 class="mega">NAV<span class="o">AIR</span><span class="g">GAP</span></h1>
+    <div class="hero-line" id="typeline"></div>
+    <div class="meta-row">
+      <div>ROLE<b>SECURITY × BACKEND</b></div>
+      <div>STATUS<b>OPEN TO OPPORTUNITIES</b></div>
+      <div>LOCATION<b>INDIA · REMOTE</b></div>
+      <div>MODE<b>DEFENSE-IN-DEPTH</b></div>
+    </div>
+    <div class="scroll-cue">SCROLL TO DECRYPT</div>
+  </section>
 
-      <div class="receipt">
-        <b>OPEN SOURCE</b>
-        <div class="rline"></div>
-        HANDLE ....... navairgap<br>
-        STACK ........ <span class="acc">rust · py · c</span><br>
-        MODE ......... defense-in-depth<br>
-        STATUS ....... shipping
-        <div class="rline"></div>
-        <span class="acc">NAV ◢ 2026</span>
-      </div>
+  <section id="s1">
+    <div class="k">01 // ident</div>
+    <h2 class="big">DEFENSE IS <em>OFFENSE</em>,<br>INVERTED.</h2>
+    <p class="sub">I build security tools and backend systems — <b>SentinelWiFi</b>, <b>PortWarden</b>, <b>TLS-Probe</b> — small, sharp, tested. The fastest way to learn how systems work is to study how they break: kernels, protocols, packets, memory.</p>
+    <p class="sub" style="margin-top:18px">Depth over breadth. One project at a time, built for real — CI on every repo that matters, tests before features, READMEs that tell the truth.</p>
+    <div style="margin-top:34px">
+      <div class="tline">SECURITY ENGINEERING</div>
+      <div class="tline">SYSTEMS &amp; BACKENDS</div>
+      <div class="tline">OFFENSIVE RESEARCH</div>
     </div>
+  </section>
 
-    <!-- right rail -->
-    <div class="rail">
-      <div class="rcard ecard">
-        <h3>Early Access</h3>
-        <p><b style="color:var(--ink)">How I work.</b> I build small, sharp tools and grow them in public — tests first, CI always, honest READMEs.</p>
-        <a class="go" href="#projects">see the workbench →</a>
-      </div>
-      <div class="rcard ecard">
-        <h3>Status</h3>
-        <p style="font-family:var(--mono);font-size:12px;line-height:2">
-          repos ........ <b style="color:var(--acc)">20+</b><br>
-          focus ........ security eng<br>
-          location ..... india · remote<br>
-          reply time ... fast
-        </p>
-        <a class="go" href="#contact">get in touch →</a>
-      </div>
+  <section id="s2">
+    <div class="k">02 // arsenal</div>
+    <h2 class="big">LOADOUT</h2>
+    <div class="cards">
+      <div class="card"><h4>LANGUAGES <i>▲</i></h4><ul>
+        <li>python — daily driver</li><li>rust — systems &amp; tooling</li>
+        <li>c / c++ — low level</li><li>js / ts — when needed</li><li>solidity — web3 sandbox</li></ul></div>
+      <div class="card"><h4>SECURITY <i>▲</i></h4><ul>
+        <li>network recon &amp; defense</li><li>wifi deauth detection</li>
+        <li>honeypots &amp; monitoring</li><li>ctf — pwn · crypto · web</li><li>linux hardening</li></ul></div>
+      <div class="card"><h4>BACKEND <i>▲</i></h4><ul>
+        <li>node · express · ws</li><li>queues · job systems</li>
+        <li>ratelimiters · kv stores</li><li>docker · gh actions</li><li>git · pages · ci</li></ul></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================ ABOUT ============================ -->
-<section class="wrap" id="about">
-  <div class="seclabel">section 01</div>
-  <h2 class="title">About</h2>
-  <div class="grid3">
-    <div class="card ecard reveal">
-      <div class="num">SYS.01</div>
-      <h4>Who</h4>
-      <p>Security-minded backend developer. I like the parts of the stack most people skip — kernels, protocols, memory, packets.</p>
-      <ul><li>cybersecurity × backend</li><li>systems over frameworks</li><li>linux daily driver</li></ul>
+  <section id="s3">
+    <div class="k">03 // operations</div>
+    <h2 class="big">SELECTED <em>OPS</em></h2>
+    <div class="rows">
+      <a class="row" href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener"><span class="n">OP/01</span><span class="t">SENTINELWIFI</span><span class="d">WIFI DEAUTH DETECTOR · SDR</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/portwarden" target="_blank" rel="noopener"><span class="n">OP/02</span><span class="t">PORTWARDEN</span><span class="d">ENCRYPTED PORT KNOCKER · RUST</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/tls-probe" target="_blank" rel="noopener"><span class="n">OP/03</span><span class="t">TLS-PROBE</span><span class="d">HAND-ROLLED TLS INSPECTOR</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/honeypot-lite" target="_blank" rel="noopener"><span class="n">OP/04</span><span class="t">HONEYPOT-LITE</span><span class="d">FAKE SERVICES · REAL LOGS</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/banter" target="_blank" rel="noopener"><span class="n">OP/05</span><span class="t">BANTER</span><span class="d">ZERO-HISTORY CHAT · CI-TESTED</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://os.navairgap.github.io" onclick="location.href='/os/';return false;"><span class="n">OP/06</span><span class="t">NAVAIRGAP OS</span><span class="d">A PORTFOLIO YOU CAN BOOT</span><span class="a">↗ ENTER</span></a>
     </div>
-    <div class="card ecard reveal">
-      <div class="num">SYS.02</div>
-      <h4>How</h4>
-      <p>Depth over breadth. One project at a time, built for real — tested, documented, shipped. Scaffolds are labeled honestly.</p>
-      <ul><li>CI on every repo that matters</li><li>tests before features</li><li>docs people actually read</li></ul>
-    </div>
-    <div class="card ecard reveal">
-      <div class="num">SYS.03</div>
-      <h4>Why</h4>
-      <p>Defense is offense, inverted. Understanding how systems break is the fastest way to learn how they work.</p>
-      <ul><li>CTFs &amp; writeups</li><li>open source tooling</li><li>open to opportunities</li></ul>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================ SKILLS ============================ -->
-<section class="wrap" id="skills">
-  <div class="seclabel">section 02</div>
-  <h2 class="title">Skills</h2>
-  <div class="grid3">
-    <div class="card ecard reveal">
-      <div class="num">LNG.01</div>
-      <h4>Languages</h4>
-      <ul><li>python — daily driver</li><li>rust — systems &amp; tooling</li><li>c / c++ — low level</li><li>js / ts — when needed</li><li>solidity — web3 sandbox</li></ul>
+  <section id="s4">
+    <div class="k">04 // uplink</div>
+    <h2 class="big">OPEN <em>CHANNEL</em></h2>
+    <p class="sub">For opportunities, collaborations, or security questions. Response time: fast.</p>
+    <div class="contact-links">
+      <a class="clink" href="https://github.com/navairgap" target="_blank" rel="noopener">GITHUB ↗</a>
+      <a class="clink" href="mailto:nav54877@gmail.com">EMAIL ↗</a>
+      <a class="clink" href="/os/">THE OS ↗</a>
+      <a class="clink" href="/classic.html">CLASSIC ↗</a>
     </div>
-    <div class="card ecard reveal">
-      <div class="num">SEC.02</div>
-      <h4>Security</h4>
-      <ul><li>network recon &amp; defense</li><li>wifi deauth detection</li><li>honeypots &amp; monitoring</li><li>ctf — pwn · crypto · web</li><li>linux hardening</li></ul>
-    </div>
-    <div class="card ecard reveal">
-      <div class="num">BCK.03</div>
-      <h4>Backend</h4>
-      <ul><li>node · express · websockets</li><li>queues · job systems</li><li>ratelimiters · kv stores</li><li>docker · github actions</li><li>git · gh pages</li></ul>
-    </div>
-  </div>
-</section>
+  </section>
+</main>
 
-<!-- ============================ PROJECTS ============================ -->
-<section class="wrap" id="projects">
-  <div class="seclabel">section 03</div>
-  <h2 class="title">Selected Projects</h2>
-  <div class="prow">
-    <a class="prog ecard reveal" href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener">
-      <div class="top"><i class="g"></i>SENTINELWIFI <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>Wi-Fi deauth attack detector</h4>
-      <p>RTL-SDR based 802.11 frame inspection with entropy scoring. PyPI-ready, CI-grepped.</p>
-      <div class="meta"><span><b>python</b></span><span>sdr</span><span>security</span></div></div>
-    </a>
-    <a class="prog ecard reveal" href="https://github.com/navairgap/portwarden" target="_blank" rel="noopener">
-      <div class="top"><i class="g"></i>PORTWARDEN <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>Port knocking + warden daemon</h4>
-      <p>Single-binary port knocker with encrypted knock sequences and fail2ban-style banning.</p>
-      <div class="meta"><span><b>rust</b></span><span>networking</span><span>linux</span></div></div>
-    </a>
-    <a class="prog ecard reveal" href="https://github.com/navairgap/tls-probe" target="_blank" rel="noopener">
-      <div class="top"><i></i>TLS-PROBE <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>TLS configuration scanner</h4>
-      <p>Hand-rolled TLS handshake inspector — versions, ciphers, cert chains, weak configs.</p>
-      <div class="meta"><span><b>python</b></span><span>tls</span><span>cli</span></div></div>
-    </a>
-    <a class="prog ecard reveal" href="https://github.com/navairgap/banter" target="_blank" rel="noopener">
-      <div class="top"><i class="g"></i>BANTER <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>Zero-history chat server</h4>
-      <p>Rooms, presence, typing indicators — nothing stored. Two-client integration tests in CI.</p>
-      <div class="meta"><span><b>node</b></span><span>websockets</span><span>ci</span></div></div>
-    </a>
-    <a class="prog ecard reveal" href="https://github.com/navairgap/honeypot-lite" target="_blank" rel="noopener">
-      <div class="top"><i class="g"></i>HONEYPOT-LITE <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>Low-interaction honeypot</h4>
-      <p>Fake SSH/HTTP services that log attacker behavior. Containerized, JSONL output.</p>
-      <div class="meta"><span><b>python</b></span><span>docker</span><span>blue team</span></div></div>
-    </a>
-    <a class="prog ecard reveal" href="https://navairgap.github.io/os/" target="_blank" rel="noopener">
-      <div class="top"><i class="g"></i>NAVAIRGAP OS <span style="margin-left:auto;color:var(--acc)">→</span></div>
-      <div class="body"><h4>A browser desktop that is a portfolio</h4>
-      <p>13 apps, window manager, workspaces — a React OS inside a 3D gaming room. You're looking at its landing.</p>
-      <div class="meta"><span><b>react</b></span><span>three.js</span><span>zustand</span></div></div>
-    </a>
-  </div>
-</section>
+<div class="marquee"><div>
+  DEFENSE IS OFFENSE, INVERTED&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;SECURITY × BACKEND&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;NAVAIRGAP&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;ROOT@BLACKARCH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;DEPTH OVER BREADTH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;
+  DEFENSE IS OFFENSE, INVERTED&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;SECURITY × BACKEND&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;NAVAIRGAP&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;ROOT@BLACKARCH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;DEPTH OVER BREADTH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;
+</div></div>
 
-<!-- ============================ CONTACT ============================ -->
-<section class="contact" id="contact">
-  <div class="wrap">
-    <div class="seclabel" style="color:var(--acc-soft)">section 04</div>
-    <h2 class="title">Contact</h2>
-    <div class="grid3">
-      <div class="card ecard reveal">
-        <div class="num" style="color:var(--acc-soft)">GIT.01</div>
-        <h4>GitHub</h4>
-        <p>All projects, CI badges and honest READMEs live here.</p>
-        <ul><li><a href="https://github.com/navairgap" target="_blank" rel="noopener">github.com/navairgap ↗</a></li></ul>
-      </div>
-      <div class="card ecard reveal">
-        <div class="num" style="color:var(--acc-soft)">EML.02</div>
-        <h4>Email</h4>
-        <p>For opportunities, collaborations, or security questions.</p>
-        <ul><li><a href="mailto:nav54877@gmail.com">nav54877@gmail.com</a></li></ul>
-      </div>
-      <div class="card ecard reveal">
-        <div class="num" style="color:var(--acc-soft)">OS.03</div>
-        <h4>The OS</h4>
-        <p>The interactive version of this portfolio — walk into the room.</p>
-        <ul><li><a href="/os/">navairgap.github.io/os ↗</a></li></ul>
-      </div>
-    </div>
-    <div class="foot">
-      <span><b>navairgap</b> — defense is offense, inverted</span>
-      <span>design language inspired by Zajno's Superlinked concept · built by hand, no template</span>
-      <span>© 2026 · bone on black, forever</span>
-    </div>
-  </div>
-</section>
+<footer>
+  <span><b>NAVAIRGAP</b> © 2026</span>
+  <span>3D OBJECT — DAMAGED HELMET BY THEBLUETURTLE_ / KHRONOS GLTF SAMPLES</span>
+  <span>BUILT BY HAND · NO TEMPLATE</span>
+</footer>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+/* ================= renderer / scene ================= */
+const canvas = document.getElementById("gl");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05060a);
+scene.fog = new THREE.Fog(0x05060a, 6, 16);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.01, 60);
+camera.position.set(0, 0.15, 4.4);
+
+/* environment for PBR */
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+/* lights — neon rig */
+scene.add(new THREE.AmbientLight(0x223344, 0.7));
+const key = new THREE.DirectionalLight(0xbfd4ff, 1.1); key.position.set(3, 4, 5); scene.add(key);
+const rimG = new THREE.PointLight(0x2fbf71, 22, 20); rimG.position.set(-3.4, 1.4, -2.2); scene.add(rimG);
+const rimP = new THREE.PointLight(0x8b5cff, 26, 22); rimP.position.set(3.2, -1.2, -2.6); scene.add(rimP);
+const rimR = new THREE.PointLight(0xff2b3a, 10, 16); rimR.position.set(0.4, 2.8, 2.6); scene.add(rimR);
+
+/* ================= the object ================= */
+const group = new THREE.Group();
+scene.add(group);
+let helmet = null;
+new GLTFLoader().load("assets/helmet.glb", (g) => {
+  helmet = g.scene;
+  const box = new THREE.Box3().setFromObject(helmet);
+  const size = box.getSize(new THREE.Vector3());
+  const s = 2.1 / Math.max(size.x, size.y, size.z);
+  helmet.scale.setScalar(s);
+  box.setFromObject(helmet);
+  helmet.position.y -= (box.max.y + box.min.y) / 2;
+  group.add(helmet);
+}, undefined, (e) => console.error("helmet load failed", e));
+
+/* ================= particles + grid ================= */
+const N = 900;
+const pos = new Float32Array(N * 3);
+for (let i = 0; i < N; i++) {
+  pos[i * 3] = (Math.random() - 0.5) * 26;
+  pos[i * 3 + 1] = (Math.random() - 0.5) * 16;
+  pos[i * 3 + 2] = (Math.random() - 0.5) * 18 - 3;
+}
+const pgeo = new THREE.BufferGeometry();
+pgeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+const pts = new THREE.Points(pgeo, new THREE.PointsMaterial({
+  color: 0x8b5cff, size: 0.02, transparent: true, opacity: 0.75, depthWrite: false,
+}));
+scene.add(pts);
+
+const grid = new THREE.GridHelper(40, 80, 0x2fbf71, 0x1a2436);
+grid.position.y = -2.1;
+grid.material.transparent = true;
+grid.material.opacity = 0.28;
+scene.add(grid);
+
+/* neon ring around the object */
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(1.75, 0.012, 12, 128),
+  new THREE.MeshBasicMaterial({ color: 0x2fbf71 })
+);
+ring.rotation.x = Math.PI / 2.4;
+scene.add(ring);
+const ring2 = ring.clone();
+ring2.material = new THREE.MeshBasicMaterial({ color: 0x8b5cff });
+ring2.scale.setScalar(1.18);
+ring2.rotation.x = Math.PI / 1.8;
+scene.add(ring2);
+
+/* ================= post-processing ================= */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.85, 0.55, 0.22);
+composer.addPass(bloom);
+
+const CyberShader = {
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGlitch: { value: 0 }, uVel: { value: 0 }, uRes: { value: new THREE.Vector2(innerWidth, innerHeight) } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform float uTime,uGlitch,uVel; uniform vec2 uRes; varying vec2 vUv;
+    float rnd(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
+    void main(){
+      vec2 uv=vUv;
+      float t=floor(uTime*16.0);
+      float band=step(0.97,rnd(vec2(floor(uv.y*46.0),t)));
+      uv.x+=band*(rnd(vec2(t,7.0))-0.5)*0.12*uGlitch;
+      float sh=0.0012+uVel*0.004+uGlitch*0.007;
+      vec4 c;
+      c.r=texture2D(tDiffuse,uv+vec2(sh,0.0)).r;
+      c.g=texture2D(tDiffuse,uv).g;
+      c.b=texture2D(tDiffuse,uv-vec2(sh,0.0)).b;
+      c.a=1.0;
+      c.rgb*=0.90+0.10*sin(uv.y*uRes.y*1.6);
+      c.rgb+=(rnd(uv+fract(uTime))-0.5)*0.05;
+      float d=distance(uv,vec2(0.5));
+      c.rgb*=smoothstep(0.95,0.32,d);
+      gl_FragColor=c;
+    }`,
+};
+const cyber = new ShaderPass(CyberShader);
+composer.addPass(cyber);
+composer.addPass(new OutputPass());
+
+/* ================= scroll / mouse state ================= */
+let scrollT = 0, scrollC = 0, lastScroll = 0, glitch = 0;
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  scrollT = max > 0 ? scrollY / max : 0;
+  document.getElementById("prog").style.transform = `scaleX(${scrollT})`;
+}, { passive: true });
+
+const mouse = { x: 0, y: 0, cx: 0, cy: 0 };
+addEventListener("mousemove", (e) => {
+  mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+  mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+  const cur = document.getElementById("cur");
+  cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
+});
+document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
+  el.addEventListener("mouseenter", () => document.getElementById("cur").classList.add("hot"));
+  el.addEventListener("mouseleave", () => document.getElementById("cur").classList.remove("hot"));
+});
+
+/* section observer -> nav + glitch burst */
+const links = document.querySelectorAll("#secnav a");
+const io = new IntersectionObserver((es) => {
+  es.forEach((e) => {
+    if (e.isIntersecting) {
+      links.forEach((l) => l.classList.toggle("on", l.getAttribute("href") === "#" + e.target.id));
+      glitch = Math.min(1, glitch + 0.85);
+    }
+  });
+}, { threshold: 0.45 });
+document.querySelectorAll("section").forEach((s) => io.observe(s));
+
+/* ================= main loop ================= */
+const clock = new THREE.Clock();
+function tick() {
+  requestAnimationFrame(tick);
+  const t = clock.getElapsedTime();
+  const dt = Math.min(clock.getDelta() || 0.016, 0.05);
+
+  scrollC += (scrollT - scrollC) * 0.07;
+  const vel = Math.min(Math.abs(scrollT - lastScroll) * 60, 1);
+  lastScroll += (scrollT - lastScroll) * 0.2;
+  glitch *= 0.92;
+
+  if (helmet) {
+    helmet.rotation.y = scrollC * Math.PI * 2.3 + t * 0.12;
+    helmet.rotation.x = Math.sin(scrollC * Math.PI) * 0.35 + mouse.cy * 0.12;
+    helmet.rotation.z = mouse.cx * -0.08;
+    helmet.position.y += Math.sin(t * 0.8) * 0.0012;
+  }
+  mouse.cx += (mouse.x - mouse.cx) * 0.06;
+  mouse.cy += (mouse.y - mouse.cy) * 0.06;
+  group.position.x = mouse.cx * 0.25;
+  group.position.y = -scrollC * 0.6 + mouse.cy * -0.15;
+
+  camera.position.z = 4.4 - scrollC * 1.7;
+  camera.position.x = mouse.cx * 0.35;
+  camera.position.y = 0.15 + mouse.cy * -0.2 - scrollC * 0.3;
+  camera.lookAt(0, group.position.y * 0.6, 0);
+
+  ring.rotation.z = t * 0.25;
+  ring2.rotation.z = -t * 0.18;
+  pts.rotation.y = t * 0.02 + scrollC * 0.6;
+  grid.position.z = (scrollC * 14) % 1;
+
+  cyber.uniforms.uTime.value = t;
+  cyber.uniforms.uGlitch.value = glitch;
+  cyber.uniforms.uVel.value = vel;
+
+  composer.render();
+  void dt;
+}
+tick();
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+  cyber.uniforms.uRes.value.set(innerWidth, innerHeight);
+});
+</script>
 
 <script>
-/* ---------------- PCB circuit background (generated) ---------------- */
+/* ================= terminal boot ================= */
 (function(){
-  const svg = document.getElementById('pcb');
-  const NS = 'http://www.w3.org/2000/svg';
-  const G = 44; // grid
-  let W, H;
-  function build(){
-    W = svg.clientWidth; H = svg.clientHeight;
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg.innerHTML = '';
-    const cols = Math.ceil(W/G), rows = Math.ceil(H/G);
-    // gray traces: random walks with 45° bends
-    function trace(x,y,orange){
-      let d = `M ${x} ${y}`, cx = x, cy = y;
-      const steps = 3 + Math.floor(Math.random()*4);
-      for(let i=0;i<steps;i++){
-        const horiz = Math.random() > .5;
-        const len = (1 + Math.floor(Math.random()*4)) * G * (Math.random()>.5?1:-1);
-        if(horiz) cx += len; else cy += len;
-        // 45° dogleg
-        const mx = horiz ? cx - Math.sign(len)*G : cx;
-        const my = horiz ? cy : cy - Math.sign(len)*G;
-        d += ` L ${mx} ${my} L ${cx} ${cy}`;
-        if(Math.random()>.4){ // via
-          const c = document.createElementNS(NS,'circle');
-          c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',4.5);
-          c.setAttribute('fill', orange ? '#e8590c' : '#b9b6ad');
-          c.setAttribute('stroke','#e9e7e2'); c.setAttribute('stroke-width','1.5');
-          svg.appendChild(c);
-        }
-      }
-      const p = document.createElementNS(NS,'path');
-      p.setAttribute('d',d);
-      p.setAttribute('fill','none');
-      p.setAttribute('stroke', orange ? '#e8590c' : '#c9c6bd');
-      p.setAttribute('stroke-width', orange ? 2.5 : 2);
-      p.setAttribute('opacity', orange ? .8 : .9);
-      svg.appendChild(p);
-    }
-    for(let i=0;i<Math.floor(cols*rows/16);i++)
-      trace(Math.floor(Math.random()*cols)*G, Math.floor(Math.random()*rows)*G, false);
-    for(let i=0;i<7;i++)
-      trace(Math.floor(Math.random()*cols)*G, Math.floor(Math.random()*rows)*G, true);
-    // pad clusters (little chip outlines)
-    for(let i=0;i<5;i++){
-      const g = document.createElementNS(NS,'rect');
-      const w = (2+Math.floor(Math.random()*3))*G, h = (1+Math.floor(Math.random()*2))*G;
-      g.setAttribute('x', Math.floor(Math.random()*(cols-3))*G);
-      g.setAttribute('y', Math.floor(Math.random()*(rows-2))*G);
-      g.setAttribute('width', w); g.setAttribute('height', h);
-      g.setAttribute('fill','none'); g.setAttribute('stroke','#bdbab1');
-      g.setAttribute('stroke-width','1.5'); g.setAttribute('stroke-dasharray','6 5');
-      svg.appendChild(g);
-    }
+  const lines = [
+    ["NAV54877 SECURE SHELL v2.6 — cold boot", ""],
+    ["> mounting /dev/persona ............ <span class='p'>OK</span>", 120],
+    ["> loading defense modules .......... <span class='p'>OK</span>", 130],
+    ["> arming honeypots ................. <span class='r'>ARMED</span>", 150],
+    ["> whoami ........................... <span class='p'>navairgap</span>", 170],
+    ["> motto ............................ defense is offense, inverted", 150],
+    ["> access granted_ ", 200],
+  ];
+  const pre = document.getElementById("bootlog");
+  const boot = document.getElementById("boot");
+  let li = 0, done = false;
+  function next(){
+    if (done) return;
+    if (li >= lines.length) { finish(); return; }
+    const div = document.createElement("div");
+    div.innerHTML = lines[li][0];
+    pre.appendChild(div);
+    li++;
+    setTimeout(next, lines[li] ? (lines[li][1] || 90) : 0);
   }
-  build();
-  let t; window.addEventListener('resize', ()=>{ clearTimeout(t); t=setTimeout(build, 200); });
+  function finish(){
+    if (done) return; done = true;
+    boot.classList.add("done");
+    typeLine();
+  }
+  boot.addEventListener("click", finish);
+  setTimeout(next, 350);
+
+  /* hero typed line */
+  const msg = "> security engineer · backend · systems — the only stack you need to trust.";
+  let ci = 0;
+  const tl = document.getElementById("typeline");
+  function typeLine(){
+    if (ci > msg.length) return;
+    tl.textContent = msg.slice(0, ci++);
+    setTimeout(typeLine, 26);
+  }
 })();
-
-/* ---------------- LED strip cycler ---------------- */
-const LED = [
-  ["SENTINELWIFI","wifi deauth detector"],
-  ["PORTWARDEN","encrypted port knocker"],
-  ["TLS-PROBE","hand-rolled tls inspector"],
-  ["HONEYPOT-LITE","fake services, real logs"],
-  ["BANTER","zero-history chat"],
-  ["NAVAIRGAP OS","a portfolio you can boot"]
-];
-let li = 0;
-const lbl = document.getElementById('ledlabel');
-function renderLed(){
-  lbl.style.opacity = 0;
-  setTimeout(()=>{ lbl.innerHTML = `<b>${LED[li][0]}</b> — ${LED[li][1]}`; lbl.style.opacity = 1; }, 280);
-}
-function cycle(d){ li = (li + d + LED.length) % LED.length; renderLed(); clearInterval(window.__led); window.__led = setInterval(()=>{ li=(li+1)%LED.length; renderLed(); }, 2600); }
-window.__led = setInterval(()=>{ li=(li+1)%LED.length; renderLed(); }, 2600);
-
-/* ---------------- scroll reveal ---------------- */
-const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-/* ---------------- subtle hero parallax ---------------- */
-const hero = document.querySelector('.hero');
-const feat = document.querySelector('.feature');
-hero.addEventListener('mousemove', e => {
-  const r = hero.getBoundingClientRect();
-  const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
-  feat.style.transform = `translate(${x*-8}px, ${y*-6}px)`;
-});
 </script>
 </body>
 </html>
