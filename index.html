@@ -130,20 +130,11 @@ h2.big{transform:skewY(var(--sk,0deg))}
   section{padding:14vh 7vw}
 }
 
-/* glow feature cards — gradient border + blurred glow (background-clip technique) */
-.gear-grid{display:grid;grid-template-columns:1fr;gap:40px;width:100%;max-width:936px;margin:28px auto 0}
-@media(min-width:768px){.gear-grid{grid-template-columns:repeat(3,1fr);gap:12px}}
-.glowcard{position:relative;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;max-width:300px;margin:0 auto}
-@media(max-width:767px){.glowcard{max-width:260px}}
-.glowcard .glow{position:absolute;left:0;right:0;height:300px;opacity:.6;border-radius:40px;pointer-events:none;filter:blur(45px)}
-@media(max-width:767px){.glowcard .glow{height:260px}}
-.glowcard .face{position:relative;align-self:stretch;height:300px;border-radius:40px;z-index:10;overflow:hidden;border:8px solid transparent}
-@media(max-width:767px){.glowcard .face{height:260px}}
-.glowcard .inner{width:100%;height:100%;padding:28px;display:flex;flex-direction:column;justify-content:space-between}
-.glowcard .icw{color:rgba(255,255,255,.9);line-height:0}
-.glowcard h4{color:#fff;font-weight:500;font-size:20px;margin:0 0 12px;letter-spacing:-.02em;font-family:var(--mono)}
-.glowcard p{color:#9ca3af;font-size:14px;line-height:1.6;font-weight:400;margin:0}
-.glowcard ::selection{background:rgba(255,255,255,.2)}
+
+/* glow on existing cards — blurred gradient halo + gradient border */
+.card{position:relative;border-radius:16px}
+.card .cglow{position:absolute;inset:-8px;border-radius:22px;filter:blur(32px);opacity:.3;pointer-events:none;z-index:-1;transition:opacity .3s}
+.card:hover .cglow{opacity:.5}
 </style>
 </head>
 <body>
@@ -193,58 +184,19 @@ h2.big{transform:skewY(var(--sk,0deg))}
       <div class="tline">SYSTEMS &amp; BACKENDS</div>
       <div class="tline">OFFENSIVE RESEARCH</div>
     </div>
-      <p class="sub rv" style="margin-top:44px">the setup — three places the work happens.</p>
-    <div class="gear-grid">
-      <div class="glowcard rv" style="transition-delay:100ms">
-        <div class="glow" style="background:linear-gradient(137deg, #FF3D77 0%, #FFB1CE 45%, #FF9D3C 100%)"></div>
-        <div class="face" style="background:linear-gradient(#1A1A1C,#1A1A1C) padding-box,linear-gradient(137deg, #FF3D77 0%, #FFB1CE 45%, #FF9D3C 100%) border-box">
-          <div class="inner">
-            <div class="icw"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg></div>
-            <div>
-              <h4>Hardware</h4>
-              <p>My entire desktop setup is built for power. It is silent, durable, and holds my focus.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="glowcard rv" style="transition-delay:200ms">
-        <div class="glow" style="background:linear-gradient(137deg, #FFFFFF 0%, #7DD3FC 45%, #06B6D4 100%)"></div>
-        <div class="face" style="background:linear-gradient(#1A1A1C,#1A1A1C) padding-box,linear-gradient(137deg, #FFFFFF 0%, #7DD3FC 45%, #06B6D4 100%) border-box">
-          <div class="inner">
-            <div class="icw"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></div>
-            <div>
-              <h4>Studio</h4>
-              <p>Studio is where I define every single pixel. It is the hub for each canvas I deliver.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="glowcard rv" style="transition-delay:300ms">
-        <div class="glow" style="background:linear-gradient(137deg, #4361EE 0%, #E0AEFF 45%, #F72585 100%)"></div>
-        <div class="face" style="background:linear-gradient(#1A1A1C,#1A1A1C) padding-box,linear-gradient(137deg, #4361EE 0%, #E0AEFF 45%, #F72585 100%) border-box">
-          <div class="inner">
-            <div class="icw"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-            <div>
-              <h4>Motion</h4>
-              <p>I use Motion to build lively prototypes, bridging the gap between views and code.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-</section>
+      </section>
 
   <section id="s2">
     <div class="k">02 // arsenal</div>
     <h2 class="big">LOADOUT</h2>
     <div class="cards">
-      <div class="card"><h4>LANGUAGES <i>▲</i></h4><ul>
+      <div class="card" style="background:linear-gradient(rgba(5,6,10,.94),rgba(5,6,10,.94)) padding-box,linear-gradient(137deg, #FFFFFF 0%, #7DD3FC 45%, #06B6D4 100%) border-box;border:1px solid transparent"><div class="cglow" style="background:linear-gradient(137deg, #FFFFFF 0%, #7DD3FC 45%, #06B6D4 100%)"></div><h4>LANGUAGES <i>▲</i></h4><ul>
         <li>python — daily driver</li><li>rust — systems &amp; tooling</li>
         <li>c / c++ — low level</li><li>js / ts — when needed</li><li>solidity — web3 sandbox</li></ul></div>
-      <div class="card"><h4>SECURITY <i>▲</i></h4><ul>
+      <div class="card" style="background:linear-gradient(rgba(5,6,10,.94),rgba(5,6,10,.94)) padding-box,linear-gradient(137deg, #FF3D77 0%, #FFB1CE 45%, #FF9D3C 100%) border-box;border:1px solid transparent"><div class="cglow" style="background:linear-gradient(137deg, #FF3D77 0%, #FFB1CE 45%, #FF9D3C 100%)"></div><h4>SECURITY <i>▲</i></h4><ul>
         <li>network recon &amp; defense</li><li>wifi deauth detection</li>
         <li>honeypots &amp; monitoring</li><li>ctf — pwn · crypto · web</li><li>linux hardening</li></ul></div>
-      <div class="card"><h4>BACKEND <i>▲</i></h4><ul>
+      <div class="card" style="background:linear-gradient(rgba(5,6,10,.94),rgba(5,6,10,.94)) padding-box,linear-gradient(137deg, #4361EE 0%, #E0AEFF 45%, #F72585 100%) border-box;border:1px solid transparent"><div class="cglow" style="background:linear-gradient(137deg, #4361EE 0%, #E0AEFF 45%, #F72585 100%)"></div><h4>BACKEND <i>▲</i></h4><ul>
         <li>node · express · ws</li><li>queues · job systems</li>
         <li>ratelimiters · kv stores</li><li>docker · gh actions</li><li>git · pages · ci</li></ul></div>
     </div>
@@ -1537,7 +1489,7 @@ document.querySelectorAll(".row .t, .tline, .clink, #secnav a, .k").forEach((el)
 
 /* scroll reveal — staggered per section */
 document.querySelectorAll("section").forEach((sec) => {
-  const items = sec.querySelectorAll(".k, h1.mega, .hero-line, .meta-row div, h2.big, p.sub, .tline, .card, .row, .clink, .glowcard");
+  const items = sec.querySelectorAll(".k, h1.mega, .hero-line, .meta-row div, h2.big, p.sub, .tline, .card, .row, .clink");
   items.forEach((el, i) => {
     el.classList.add("rv");
     el.style.transitionDelay = (i * 65) + "ms";
@@ -1600,12 +1552,6 @@ addEventListener("scroll", () => {
     setTimeout(typeLine, 26);
   }
 })();
-</script>
-<script type="module">
-/* glow cards keep their spec entrance delays (0.1/0.2/0.3s) */
-document.querySelectorAll(".glowcard").forEach((el, i) => {
-  el.style.transitionDelay = (100 * (i + 1)) + "ms";
-});
 </script>
 </body>
 </html>
