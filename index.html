@@ -3,301 +3,236 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flowstate — Deep Work in a Distracted World</title>
-<meta name="description" content="Cut through the noise, reclaim your attention, and do work that truly matters. Join the Flowstate waitlist.">
+<title>NAVAIRGAP — defense is offense, inverted</title>
+<meta name="description" content="navairgap — cybersecurity × backend. security tools, systems, CTF research.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2305060a'/><path d='M28 74 L50 26 L72 74 Z' fill='none' stroke='%232fbf71' stroke-width='8'/></svg>">
 <style>
-:root {
-  --hero-base:            #04050c;
-  --heading:             #eef0f6;
-  --body-muted:          #b9becf;
-  --on-media:            #ffffff;
-  --action-inverse:      #ffffff;
-  --action-inverse-fg:   #2f2f33;
-  --glass-fill:          rgba(255,255,255,0.08);
-  --glass-border:        rgba(255,255,255,0.16);
-  --scrim:               rgba(4,5,12,0.46);
-  --scrim-strong:        rgba(4,5,12,0.68);
-  --scrim-soft:          rgba(4,5,12,0.12);
-  --duration-fast:       150ms;
-  --ease-entrance:       cubic-bezier(0.2, 0, 0, 1);
+:root{
+  --bg:#05060a; --ink:#e8e6df; --dim:#8a8a96; --grn:#2fbf71; --pur:#8b5cff; --red:#ff2b3a;
+  --mono:"JetBrains Mono",ui-monospace,monospace; --disp:"Archivo Black",Impact,sans-serif;
 }
-* { margin: 0; box-sizing: border-box; }
-html { font-size: 16px; }
-@media (max-width: 1920px) { html { font-size: 0.833333vw; } }
-@media (max-width: 1440px) { html { font-size: 1.111111vw; } }
-@media (max-width: 1024px) { html { font-size: 1.5625vw;   } }
-@media (max-width: 640px)  { html { font-size: 4.444444vw; } }
-a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-body {
-  font-family: "Onest", sans-serif;
-  background: var(--hero-base);
-  color: var(--heading);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--mono);overflow-x:hidden;cursor:none}
+::selection{background:var(--grn);color:#05060a}
+a{color:inherit;text-decoration:none;cursor:none}
+@media(pointer:coarse){body,a{cursor:auto}}
 
-section.hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100lvh;
-  width: 100vw;
-  overflow: hidden;
-  background: var(--hero-base);
-  text-align: center;
-  padding: 0 1.25rem;
-}
-@media (min-width: 640px) { section.hero { padding: 0 2.5rem; } }
+/* ---------- fixed WebGL canvas ---------- */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
 
-/* 1. fluid canvas */
-canvas#fluid {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
+/* ---------- HUD overlays ---------- */
+.scan{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.noise{position:fixed;inset:0;z-index:41;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
+.frame{position:fixed;inset:14px;z-index:42;pointer-events:none}
+.frame i{position:absolute;width:22px;height:22px;border:2px solid rgba(232,230,223,.5)}
+.frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+.frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+.frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+.frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+.progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:60;transform-origin:0 50%;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--grn),var(--pur),var(--red))}
+.secnav{position:fixed;left:22px;top:50%;transform:translateY(-50%);z-index:45;display:flex;flex-direction:column;gap:14px}
+.secnav a{font-size:9px;letter-spacing:.2em;color:var(--dim);display:flex;align-items:center;gap:8px;transition:color .2s}
+.secnav a::before{content:"";width:14px;height:1px;background:var(--dim);transition:all .25s}
+.secnav a.on{color:var(--grn)}
+.secnav a.on::before{width:26px;background:var(--grn)}
 
-/* 2. scrim */
-.scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(115% 95% at 50% 46%,
-    var(--scrim-strong) 0%, var(--scrim-strong) 24%, var(--scrim) 52%, var(--scrim-soft) 100%);
-}
+/* custom cursor */
+#cur{position:fixed;z-index:100;width:34px;height:34px;pointer-events:none;transform:translate(-50%,-50%);transition:width .18s,height .18s}
+#cur::before,#cur::after{content:"";position:absolute;background:var(--grn);opacity:.9}
+#cur::before{left:50%;top:0;width:1px;height:100%;transform:translateX(-50%)}
+#cur::after{top:50%;left:0;height:1px;width:100%;transform:translateY(-50%)}
+#cur i{position:absolute;inset:8px;border:1px solid rgba(47,191,113,.7);border-radius:50%;transition:inset .18s}
+#cur.hot i{inset:2px;border-color:var(--red)}
+@media(pointer:coarse){#cur{display:none}}
 
-/* 3. top nav */
-header.nav {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem;
-  z-index: 20;
-}
-@media (min-width: 640px) { header.nav { padding: 1.75rem 2.5rem; } }
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  font-size: 1.15rem;
-  color: var(--on-media);
-  letter-spacing: -0.01em;
-}
-.brand svg { width: 1.35rem; height: 1.35rem; }
-@media (min-width: 640px) {
-  .brand { font-size: 1.375rem; }
-  .brand svg { width: 1.5rem; height: 1.5rem; }
-}
-.navlinks {
-  display: none;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 3rem;
-  align-items: center;
-  gap: 2.25rem;
-  border-radius: 9999px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-fill);
-  padding: 0 1.75rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-@media (min-width: 640px) { .navlinks { display: flex; } }
-.navlinks a {
-  font-size: 0.95rem;
-  color: var(--body-muted);
-  transition: color var(--duration-fast) var(--ease-entrance);
-  white-space: nowrap;
-}
-.navlinks a:hover { color: var(--heading); }
+/* ---------- boot overlay ---------- */
+#boot{position:fixed;inset:0;z-index:90;background:#04050 8;background:#040508;display:flex;align-items:center;justify-content:center;transition:opacity .7s}
+#boot.done{opacity:0;pointer-events:none}
+#boot pre{font-size:12px;line-height:1.9;color:var(--grn);width:min(560px,86vw);white-space:pre-wrap;text-shadow:0 0 8px rgba(47,191,113,.5)}
+#boot .skip{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;color:var(--dim);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+#boot pre .p{color:var(--pur)} #boot pre .r{color:var(--red)}
 
-/* shared white pill */
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  border-radius: 9999px;
-  background: var(--action-inverse);
-  padding: 0 1.125rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--action-inverse-fg);
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
-  transition: background var(--duration-fast) var(--ease-entrance);
-}
-.pill:hover { background: rgba(255,255,255,0.85); }
-.pill:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
-@media (min-width: 640px) {
-  .pill { height: 2.75rem; padding: 0 1.375rem; font-size: 0.95rem; }
-}
+/* ---------- content ---------- */
+main{position:relative;z-index:10}
+section{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:14vh 8vw}
+.k{font-size:10px;letter-spacing:.34em;color:var(--grn);text-transform:uppercase;margin-bottom:22px}
+.k::before{content:"[ "}.k::after{content:" ]"}
 
-/* 4. center column */
-.column {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 22rem;
-}
-@media (min-width: 640px)  { .column { max-width: 40rem; } }
-@media (min-width: 1024px) { .column { max-width: 52rem; } }
+h1.mega{font-family:var(--disp);font-size:clamp(52px,11vw,150px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase}
+h1.mega .o{color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+h1.mega .g{color:var(--grn);text-shadow:0 0 34px rgba(47,191,113,.45)}
+h2.big{font-family:var(--disp);font-size:clamp(30px,5.4vw,68px);line-height:1;text-transform:uppercase;margin-bottom:26px}
+h2.big em{font-style:normal;color:var(--pur);text-shadow:0 0 28px rgba(139,92,255,.5)}
+p.sub{color:var(--dim);font-size:13px;line-height:1.9;max-width:52ch}
+p.sub b{color:var(--ink);font-weight:500}
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 9999px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-fill);
-  padding: 0.4rem 0.875rem;
-  font-size: 0.72rem;
-  color: var(--body-muted);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-@media (min-width: 640px) { .badge { font-size: 0.8rem; } }
+.hero-line{margin-top:26px;font-size:12px;color:var(--grn)}
+.hero-line::after{content:"▌";animation:blink 1s infinite;color:var(--grn)}
+.meta-row{display:flex;gap:38px;margin-top:44px;flex-wrap:wrap}
+.meta-row div{font-size:10px;letter-spacing:.14em;color:var(--dim);line-height:2}
+.meta-row b{display:block;color:var(--ink);font-weight:500;font-size:12px}
+.scroll-cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.4em;color:var(--dim)}
+.scroll-cue::after{content:"";display:block;width:1px;height:44px;margin:12px auto 0;background:linear-gradient(var(--grn),transparent);animation:drop 1.6s infinite}
+@keyframes drop{from{transform:scaleY(0);transform-origin:top}to{transform:scaleY(1);transform-origin:top}}
 
-h1 {
-  margin-top: 1.25rem;
-  max-width: 20rem;
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--heading);
-  text-align: center;
-}
-@media (min-width: 640px)  { h1 { margin-top: 1.75rem; max-width: 34rem; font-size: 3.5rem; } }
-@media (min-width: 1024px) { h1 { max-width: 46rem; font-size: 5rem; } }
+.rows{border-top:1px solid rgba(232,230,223,.14)}
+.row{display:grid;grid-template-columns:70px 1fr auto auto;gap:22px;align-items:center;padding:24px 8px;border-bottom:1px solid rgba(232,230,223,.14);transition:background .2s,padding-left .25s;position:relative}
+.row:hover{background:rgba(139,92,255,.06);padding-left:22px}
+.row .n{font-size:10px;color:var(--dim)}
+.row .t{font-family:var(--disp);font-size:clamp(17px,2.4vw,28px);text-transform:uppercase;letter-spacing:.01em}
+.row:hover .t{color:var(--grn)}
+.row .d{font-size:10px;color:var(--dim);letter-spacing:.1em}
+.row .a{font-size:11px;color:var(--pur)}
+.row::after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;background:var(--grn);transition:width .35s}
+.row:hover::after{width:100%}
 
-.subline {
-  margin-top: 1rem;
-  max-width: 20rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--body-muted);
-}
-@media (min-width: 640px)  { .subline { margin-top: 1.25rem; max-width: 34rem; font-size: 1.1rem; } }
-@media (min-width: 1024px) { .subline { max-width: none; font-size: 1.2rem; } }
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:10px}
+.card{border:1px solid rgba(232,230,223,.16);padding:24px 22px;background:rgba(5,6,10,.55);backdrop-filter:blur(6px);transition:border-color .25s,transform .25s}
+.card:hover{border-color:var(--grn);transform:translateY(-4px)}
+.card h4{font-size:12px;letter-spacing:.2em;color:var(--ink);margin-bottom:14px;display:flex;justify-content:space-between}
+.card h4 i{color:var(--red);font-style:normal}
+.card li{list-style:none;font-size:11px;color:var(--dim);padding:6px 0;border-top:1px dashed rgba(232,230,223,.14)}
+.card li::before{content:"▸ ";color:var(--grn)}
 
-/* word-by-word reveal spans */
-.w { display: inline-block; opacity: 0; will-change: transform, opacity; }
-.w.h-word { transform: translateY(26px); transition: opacity 720ms cubic-bezier(0.33,1,0.68,1), transform 720ms cubic-bezier(0.33,1,0.68,1); }
-.w.s-word { transform: translateY(14px); transition: opacity 600ms cubic-bezier(0.33,1,0.68,1), transform 600ms cubic-bezier(0.33,1,0.68,1); }
-.in .w { opacity: 1; transform: translateY(0); }
+.tline{font-family:var(--disp);font-size:clamp(24px,4.6vw,58px);line-height:1.14;text-transform:uppercase;color:transparent;-webkit-text-stroke:1px rgba(232,230,223,.75);transition:color .3s}
+.tline:hover{color:var(--ink);-webkit-text-stroke:1px transparent}
 
-/* block reveal */
-.reveal { opacity: 0; transition: opacity 700ms var(--ease-entrance), transform 700ms var(--ease-entrance); }
-.in .reveal, .reveal.in { opacity: 1; transform: translateY(0); }
-.r-nav    { transform: translateY(-0.75rem); transition-delay: 150ms; }
-.r-badge  { transform: translateY(1.25rem);  transition-delay: 320ms; }
-.r-form   { transform: translateY(1.25rem);  transition-delay: 1450ms; }
-.r-footer { transform: translateY(1.25rem);  transition-delay: 1650ms; }
+.contact-links{display:flex;gap:18px;margin-top:34px;flex-wrap:wrap}
+.clink{border:1px solid rgba(232,230,223,.25);padding:14px 22px;font-size:11px;letter-spacing:.16em;transition:all .2s;background:rgba(5,6,10,.5)}
+.clink:hover{border-color:var(--grn);color:var(--grn);box-shadow:0 0 24px rgba(47,191,113,.25)}
+footer{padding:40px 8vw;border-top:1px solid rgba(232,230,223,.12);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:9px;letter-spacing:.18em;color:var(--dim);position:relative;z-index:10;background:rgba(4,5,8,.7)}
+footer b{color:var(--ink)}
 
-/* waitlist form */
-.formwrap { margin-top: 1.75rem; display: flex; justify-content: center; width: 100%; }
-@media (min-width: 640px) { .formwrap { margin-top: 2.5rem; } }
-form.waitlist { width: 37rem; max-width: 100%; }
-.glassbar {
-  display: flex;
-  align-items: center;
-  height: 3.5rem;
-  border-radius: 9999px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-fill);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
-  padding-left: 1.25rem;
-  padding-right: 0.35rem;
-}
-@media (min-width: 640px) {
-  .glassbar { height: 4rem; padding-left: 1.5rem; padding-right: 0.4rem; }
-}
-.glassbar input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--heading);
-  font-size: 0.95rem;
-  font-family: inherit;
-}
-@media (min-width: 640px) { .glassbar input { font-size: 1.15rem; } }
-.glassbar input::placeholder { color: var(--body-muted); }
+.flash{position:fixed;inset:0;z-index:39;pointer-events:none;background:rgba(139,92,255,.10);opacity:0}
+body.glitching .flash{animation:gflash .28s steps(2)}
+@keyframes gflash{0%{opacity:1}40%{opacity:0}60%{opacity:.7}100%{opacity:0}}
+.marquee{overflow:hidden;border-top:1px solid rgba(232,230,223,.12);border-bottom:1px solid rgba(232,230,223,.12);padding:12px 0;white-space:nowrap;position:relative;z-index:10;background:rgba(4,5,8,.6)}
+.marquee div{display:inline-block;animation:mq 26s linear infinite;font-size:10px;letter-spacing:.34em;color:var(--dim)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.marquee b{color:var(--grn);font-weight:400}
 
-/* 5. footer */
-footer.foot {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  padding: 1.25rem;
-  font-size: 0.72rem;
-  color: var(--body-muted);
-  z-index: 20;
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+h2.big{transform:skewY(var(--sk,0deg))}
+@media(max-width:860px){
+  .cards{grid-template-columns:1fr}
+  .row{grid-template-columns:44px 1fr;row-gap:6px}
+  .row .d,.row .a{display:none}
+  .secnav{display:none}
+  section{padding:14vh 7vw}
 }
-@media (min-width: 640px) { footer.foot { padding: 1.5rem 2.5rem; font-size: 0.8rem; } }
 </style>
-<script type="importmap">{ "imports": { "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs" } }</script>
 </head>
 <body>
-<section class="hero">
-  <canvas id="fluid" aria-hidden="true"></canvas>
-  <div class="scrim" aria-hidden="true"></div>
 
-  <header class="nav">
-    <a class="brand" href="/">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M2.5 9c2.5 0 2.5 4.2 5 4.2S10 9 12 9s2.5 4.2 5 4.2S19.5 9 21.5 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M2.5 15c2.5 0 2.5 4.2 5 4.2S10 15 12 15s2.5 4.2 5 4.2S19.5 15 21.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
-      </svg>
-      Flowstate
-    </a>
-    <nav class="navlinks">
-      <a href="#how-it-works">How it works?</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#products">Products</a>
-      <a href="#blog">Blog</a>
-    </nav>
-    <a class="pill" href="#get-started">Get Started</a>
-  </header>
+<canvas id="gl"></canvas>
+<div class="scan"></div>
+<div class="noise"></div>
+<div class="frame"><i></i><i></i><i></i><i></i></div>
+<div class="progress" id="prog"></div>
+<div class="flash"></div>
+<div id="cur"><i></i></div>
 
-  <div class="column">
-    <p class="badge reveal r-badge">10K+ already in flow</p>
-    <h1 id="headline">Deep Work in a Distracted World</h1>
-    <p class="subline" id="subline">Cut through the noise, reclaim your attention, and do work that truly matters.</p>
-    <div class="formwrap reveal r-form">
-      <form class="waitlist" id="waitlist">
-        <div class="glassbar">
-          <input type="email" required placeholder="Enter your email" aria-label="Email address">
-          <button class="pill" type="submit">Join Waitlist</button>
-        </div>
-      </form>
+<nav class="secnav" id="secnav">
+  <a href="#s0" class="on">BOOT</a>
+  <a href="#s1">IDENT</a>
+  <a href="#s2">ARSENAL</a>
+  <a href="#s3">OPS</a>
+  <a href="#s4">UPLINK</a>
+</nav>
+
+<div id="boot">
+  <pre id="bootlog"></pre>
+  <div class="skip">[ CLICK TO SKIP ]</div>
+</div>
+
+<main>
+  <section id="s0">
+    <div class="k">nav54877 // secure shell v2.6</div>
+    <h1 class="mega">NAV<span class="o">AIR</span><span class="g">GAP</span></h1>
+    <div class="hero-line" id="typeline"></div>
+    <div class="meta-row">
+      <div>ROLE<b>SECURITY × BACKEND</b></div>
+      <div>STATUS<b>OPEN TO OPPORTUNITIES</b></div>
+      <div>LOCATION<b>INDIA · REMOTE</b></div>
+      <div>MODE<b>DEFENSE-IN-DEPTH</b></div>
     </div>
-  </div>
+    <div class="scroll-cue">SCROLL TO DECRYPT</div>
+  </section>
 
-  <footer class="foot reveal r-footer">© 2026 Flowstate — engineered for deep work.</footer>
-</section>
+  <section id="s1">
+    <div class="k">01 // ident</div>
+    <h2 class="big">DEFENSE IS <em>OFFENSE</em>,<br>INVERTED.</h2>
+    <p class="sub">I build security tools and backend systems — <b>SentinelWiFi</b>, <b>PortWarden</b>, <b>TLS-Probe</b> — small, sharp, tested. The fastest way to learn how systems work is to study how they break: kernels, protocols, packets, memory.</p>
+    <p class="sub" style="margin-top:18px">Depth over breadth. One project at a time, built for real — CI on every repo that matters, tests before features, READMEs that tell the truth.</p>
+    <div style="margin-top:34px">
+      <div class="tline">SECURITY ENGINEERING</div>
+      <div class="tline">SYSTEMS &amp; BACKENDS</div>
+      <div class="tline">OFFENSIVE RESEARCH</div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="k">02 // arsenal</div>
+    <h2 class="big">LOADOUT</h2>
+    <div class="cards">
+      <div class="card"><h4>LANGUAGES <i>▲</i></h4><ul>
+        <li>python — daily driver</li><li>rust — systems &amp; tooling</li>
+        <li>c / c++ — low level</li><li>js / ts — when needed</li><li>solidity — web3 sandbox</li></ul></div>
+      <div class="card"><h4>SECURITY <i>▲</i></h4><ul>
+        <li>network recon &amp; defense</li><li>wifi deauth detection</li>
+        <li>honeypots &amp; monitoring</li><li>ctf — pwn · crypto · web</li><li>linux hardening</li></ul></div>
+      <div class="card"><h4>BACKEND <i>▲</i></h4><ul>
+        <li>node · express · ws</li><li>queues · job systems</li>
+        <li>ratelimiters · kv stores</li><li>docker · gh actions</li><li>git · pages · ci</li></ul></div>
+    </div>
+  </section>
+
+  <section id="s3">
+    <div class="k">03 // operations</div>
+    <h2 class="big">SELECTED <em>OPS</em></h2>
+    <div class="rows">
+      <a class="row" href="https://github.com/navairgap/SentinelWiFi" target="_blank" rel="noopener"><span class="n">OP/01</span><span class="t">SENTINELWIFI</span><span class="d">WIFI DEAUTH DETECTOR · SDR</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/portwarden" target="_blank" rel="noopener"><span class="n">OP/02</span><span class="t">PORTWARDEN</span><span class="d">ENCRYPTED PORT KNOCKER · RUST</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/tls-probe" target="_blank" rel="noopener"><span class="n">OP/03</span><span class="t">TLS-PROBE</span><span class="d">HAND-ROLLED TLS INSPECTOR</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/honeypot-lite" target="_blank" rel="noopener"><span class="n">OP/04</span><span class="t">HONEYPOT-LITE</span><span class="d">FAKE SERVICES · REAL LOGS</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://github.com/navairgap/banter" target="_blank" rel="noopener"><span class="n">OP/05</span><span class="t">BANTER</span><span class="d">ZERO-HISTORY CHAT · CI-TESTED</span><span class="a">↗ GITHUB</span></a>
+      <a class="row" href="https://os.navairgap.github.io" onclick="location.href='/os/';return false;"><span class="n">OP/06</span><span class="t">NAVAIRGAP OS</span><span class="d">A PORTFOLIO YOU CAN BOOT</span><span class="a">↗ ENTER</span></a>
+    </div>
+  </section>
+
+  <section id="s4">
+    <div class="k">04 // uplink</div>
+    <h2 class="big">OPEN <em>CHANNEL</em></h2>
+    <p class="sub">For opportunities, collaborations, or security questions. Response time: fast.</p>
+    <div class="contact-links">
+      <a class="clink" href="https://github.com/navairgap" target="_blank" rel="noopener">GITHUB ↗</a>
+      <a class="clink" href="mailto:nav54877@gmail.com">EMAIL ↗</a>
+      <a class="clink" href="/os/">THE OS ↗</a>
+      <a class="clink" href="/classic.html">CLASSIC ↗</a>
+    </div>
+  </section>
+</main>
+
+<div class="marquee"><div>
+  DEFENSE IS OFFENSE, INVERTED&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;SECURITY × BACKEND&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;NAVAIRGAP&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;ROOT@BLACKARCH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;DEPTH OVER BREADTH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;
+  DEFENSE IS OFFENSE, INVERTED&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;SECURITY × BACKEND&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;NAVAIRGAP&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;ROOT@BLACKARCH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;DEPTH OVER BREADTH&nbsp;&nbsp;<b>◢</b>&nbsp;&nbsp;
+</div></div>
+
+<footer>
+  <span><b>NAVAIRGAP</b> © 2026</span>
+  <span>3D — CYBER MANNEQUIN VIA SPLINE</span>
+  <span>BUILT BY HAND · NO TEMPLATE</span>
+</footer>
+
 <script>
 function fluidSimulation(canvas) {
     canvas.width = canvas.clientWidth;
@@ -1473,66 +1408,144 @@ function fluidSimulation(canvas) {
 }
 </script>
 <script type="module">
-import Lenis from "lenis";
+/* scroll state + progress bar */
+let scrollT = 0, scrollC = 0;
+const mouse = { x: 0, y: 0, cx: 0, cy: 0 };
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  scrollT = max > 0 ? scrollY / max : 0;
+  document.getElementById("prog").style.transform = `scaleX(${scrollT})`;
+}, { passive: true });
+addEventListener("mousemove", (e) => {
+  mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+  mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+});
 
-const lenis = new Lenis({ smoothWheel: true });
-function raf(t) { lenis.raf(t); requestAnimationFrame(raf); }
-requestAnimationFrame(raf);
+/* fluid glow background — ink sim owns its own mouse/touch stirring */
+try { fluidSimulation(document.getElementById("gl")); }
+catch (e) { console.error("fluid failed to start", e); }
 
-/* ---- word-by-word reveal ---- */
-function splitWords(el, cls) {
-  const words = el.textContent.trim().split(/\s+/);
-  el.textContent = "";
-  words.forEach((w, i) => {
-    const span = document.createElement("span");
-    span.className = "w " + cls;
-    span.textContent = w;
-    el.appendChild(span);
-    if (i < words.length - 1) el.appendChild(document.createTextNode(" "));
+/* cursor follows pointer */
+addEventListener("mousemove", (e) => {
+  const cur = document.getElementById("cur");
+  cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
+});
+(function par(){ requestAnimationFrame(par);
+  mouse.cx += (mouse.x - mouse.cx) * .06; mouse.cy += (mouse.y - mouse.cy) * .06;
+  document.querySelectorAll("h1.mega").forEach(el => { el.style.transform = `translate(${mouse.cx*-10}px,${mouse.cy*-6}px)`; });
+})();
+
+document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
+  el.addEventListener("mouseenter", () => document.getElementById("cur").classList.add("hot"));
+  el.addEventListener("mouseleave", () => document.getElementById("cur").classList.remove("hot"));
+});
+
+/* section observer -> nav highlight + css glitch flash */
+const links = document.querySelectorAll("#secnav a");
+const io = new IntersectionObserver((es) => {
+  es.forEach((e) => {
+    if (e.isIntersecting) {
+      links.forEach((l) => l.classList.toggle("on", l.getAttribute("href") === "#" + e.target.id));
+      document.body.classList.remove("glitching");
+      void document.body.offsetWidth;
+      document.body.classList.add("glitching");
+    }
   });
-  return words.length;
-}
-
-const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const headEl = document.getElementById("headline");
-const subEl = document.getElementById("subline");
-const hCount = splitWords(headEl, "h-word");
-const sCount = splitWords(subEl, "s-word");
-
-/* per-word delays: heading base 480 / stagger 85ms; sub-line base 1150 / stagger 22ms */
-if (!reduced) {
-  headEl.querySelectorAll(".w").forEach((s, i) => {
-    s.style.transitionDelay = (480 + i * 85) + "ms";
-  });
-  subEl.querySelectorAll(".w").forEach((s, i) => {
-    s.style.transitionDelay = (1150 + i * 22) + "ms";
-  });
-} else {
-  document.querySelectorAll(".w").forEach(s => {
-    s.style.transition = "none";
-    s.style.opacity = "1";
-    s.style.transform = "none";
-  });
-}
-
-/* fire the reveal on load */
-requestAnimationFrame(() => requestAnimationFrame(() => {
-  document.querySelector("section.hero").classList.add("in");
-}));
-
-/* waitlist form — no backend, no-op per spec */
-document.getElementById("waitlist").addEventListener("submit", (e) => e.preventDefault());
+}, { threshold: 0.45 });
+document.querySelectorAll("section").forEach((s) => io.observe(s));
 </script>
 
 <script>
-/* mount the fluid engine after DOM ready */
-document.addEventListener("DOMContentLoaded", () => {
-  const canvas = document.querySelector("canvas#fluid");
-  if (canvas) {
-    try { fluidSimulation(canvas); }
-    catch (e) { console.error("fluid sim failed to start", e); }
-  }
+/* ================= text animations ================= */
+/* hover scramble */
+const POOL = "!<>-_\\/[]{}=+*^?#";
+function scramble(el) {
+  if (el.dataset.busy) return;
+  el.dataset.busy = "1";
+  const orig = el.dataset.orig || (el.dataset.orig = el.textContent);
+  let frame = 0;
+  const dur = 16;
+  clearInterval(el._si);
+  el._si = setInterval(() => {
+    frame++;
+    const reveal = Math.floor((frame / dur) * orig.length);
+    let out = "";
+    for (let i = 0; i < orig.length; i++) {
+      out += i < reveal ? orig[i] : (orig[i] === " " ? " " : POOL[Math.floor(Math.random() * POOL.length)]);
+    }
+    el.textContent = out;
+    if (frame >= dur) { clearInterval(el._si); el.textContent = orig; delete el.dataset.busy; }
+  }, 30);
+}
+document.querySelectorAll(".row .t, .tline, .clink, #secnav a, .k").forEach((el) => {
+  el.addEventListener("mouseenter", () => scramble(el));
 });
+
+/* scroll reveal — staggered per section */
+document.querySelectorAll("section").forEach((sec) => {
+  const items = sec.querySelectorAll(".k, h1.mega, .hero-line, .meta-row div, h2.big, p.sub, .tline, .card, .row, .clink");
+  items.forEach((el, i) => {
+    el.classList.add("rv");
+    el.style.transitionDelay = (i * 65) + "ms";
+  });
+});
+const rio = new IntersectionObserver((es) => {
+  es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll(".rv").forEach((el) => rio.observe(el));
+
+/* velocity skew on big headings */
+let skewV = 0;
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const target = max > 0 ? scrollY / max : 0;
+  skewV = Math.min(Math.abs(target - scrollT) * 260, 6) * (target > scrollT ? 1 : -1);
+  clearTimeout(window.__sk);
+  window.__sk = setTimeout(() => (skewV = 0), 90);
+  document.querySelectorAll("h2.big").forEach((h) => h.style.setProperty("--sk", skewV.toFixed(2) + "deg"));
+}, { passive: true });
+
+/* ================= terminal boot ================= */
+(function(){
+  const lines = [
+    ["NAV54877 SECURE SHELL v2.6 — cold boot", ""],
+    ["> mounting /dev/persona ............ <span class='p'>OK</span>", 120],
+    ["> loading defense modules .......... <span class='p'>OK</span>", 130],
+    ["> arming honeypots ................. <span class='r'>ARMED</span>", 150],
+    ["> whoami ........................... <span class='p'>navairgap</span>", 170],
+    ["> motto ............................ defense is offense, inverted", 150],
+    ["> access granted_ ", 200],
+  ];
+  const pre = document.getElementById("bootlog");
+  const boot = document.getElementById("boot");
+  let li = 0, done = false;
+  function next(){
+    if (done) return;
+    if (li >= lines.length) { finish(); return; }
+    const div = document.createElement("div");
+    div.innerHTML = lines[li][0];
+    pre.appendChild(div);
+    li++;
+    setTimeout(next, lines[li] ? (lines[li][1] || 90) : 0);
+  }
+  function finish(){
+    if (done) return; done = true;
+    boot.classList.add("done");
+    typeLine();
+  }
+  boot.addEventListener("click", finish);
+  setTimeout(next, 350);
+
+  /* hero typed line */
+  const msg = "> security engineer · backend · systems — the only stack you need to trust.";
+  let ci = 0;
+  const tl = document.getElementById("typeline");
+  function typeLine(){
+    if (ci > msg.length) return;
+    tl.textContent = msg.slice(0, ci++);
+    setTimeout(typeLine, 26);
+  }
+})();
 </script>
 </body>
 </html>
