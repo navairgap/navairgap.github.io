@@ -17,3 +17,7 @@ maintained · verified 2026-10-02
 ## Local dev
 
 the landing needs nothing: `python3 -m http.server` in the repo root. for the OS, run portfolio-os's own `npm run dev` — this repo only ever receives its built `dist/`.
+
+## Privacy
+
+no analytics, no cookies, no third-party trackers. the only outbound requests are the fonts and badge images that render the page. your visit stays yours.
