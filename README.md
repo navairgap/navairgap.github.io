@@ -21,3 +21,7 @@ the landing needs nothing: `python3 -m http.server` in the repo root. for the OS
 ## Privacy
 
 no analytics, no cookies, no third-party trackers. the only outbound requests are the fonts and badge images that render the page. your visit stays yours.
+
+## Editing
+
+the landing is one `index.html` — edit, commit, push, pages rebuilds in about a minute. no build step at all.
