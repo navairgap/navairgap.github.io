@@ -25,3 +25,7 @@ no analytics, no cookies, no third-party trackers. the only outbound requests ar
 ## Editing
 
 the landing is one `index.html` — edit, commit, push, pages rebuilds in about a minute. no build step at all.
+
+## Performance budget
+
+the landing aims for under 200KB before the fluid chunk, which lazy-inits on first paint. total first load stays under 1MB on a cold cache — hero animation included.
