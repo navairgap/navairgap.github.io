@@ -135,6 +135,16 @@ h2.big{transform:skewY(var(--sk,0deg))}
 .card{position:relative;border-radius:16px}
 .card .cglow{position:absolute;inset:-8px;border-radius:22px;filter:blur(32px);opacity:.3;pointer-events:none;z-index:-1;transition:opacity .3s}
 .card:hover .cglow{opacity:.5}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
