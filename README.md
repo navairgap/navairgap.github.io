@@ -29,3 +29,8 @@ the landing is one `index.html` — edit, commit, push, pages rebuilds in about 
 ## Performance budget
 
 the landing aims for under 200KB before the fluid chunk, which lazy-inits on first paint. total first load stays under 1MB on a cold cache — hero animation included.
+
+
+## Maintenance notes
+
+Before publishing, verify landing and portfolio routes, local assets, keyboard navigation, reduced-motion behavior, and narrow-screen layout. Core content should remain readable if WebGL or remote fonts fail.
