@@ -145,6 +145,18 @@ h2.big{transform:skewY(var(--sk,0deg))}
     scroll-behavior: auto !important;
   }
 }
+
+/* Keyboard users need a visible focus cue even with the custom pointer hidden. */
+:where(a, button, [role="button"], input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--grn);
+  outline-offset: 4px;
+}
+@media (forced-colors: active) {
+  :where(a, button, [role="button"], input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 4px;
+  }
+}
 </style>
 </head>
 <body>
