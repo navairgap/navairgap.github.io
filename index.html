@@ -1449,19 +1449,25 @@ addEventListener("mousemove", (e) => {
   mouse.y = (e.clientY / innerHeight - 0.5) * 2;
 });
 
-/* fluid glow background — ink sim owns its own mouse/touch stirring */
-try { fluidSimulation(document.getElementById("gl")); }
-catch (e) { console.error("fluid failed to start", e); }
+const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
 
-/* cursor follows pointer */
-addEventListener("mousemove", (e) => {
-  const cur = document.getElementById("cur");
-  cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
-});
-(function par(){ requestAnimationFrame(par);
-  mouse.cx += (mouse.x - mouse.cx) * .06; mouse.cy += (mouse.y - mouse.cy) * .06;
-  document.querySelectorAll("h1.mega").forEach(el => { el.style.transform = `translate(${mouse.cx*-10}px,${mouse.cy*-6}px)`; });
-})();
+/* Fluid simulation and pointer parallax are nonessential decoration. */
+if (!motionPreference.matches) {
+  try { fluidSimulation(document.getElementById("gl")); }
+  catch (e) { console.error("fluid failed to start", e); }
+}
+
+/* Cursor follows the pointer; keep this still when reduced motion is requested. */
+if (!motionPreference.matches) {
+  addEventListener("mousemove", (e) => {
+    const cur = document.getElementById("cur");
+    cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
+  });
+  (function par(){ requestAnimationFrame(par);
+    mouse.cx += (mouse.x - mouse.cx) * .06; mouse.cy += (mouse.y - mouse.cy) * .06;
+    document.querySelectorAll("h1.mega").forEach(el => { el.style.transform = `translate(${mouse.cx*-10}px,${mouse.cy*-6}px)`; });
+  })();
+}
 
 document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
   el.addEventListener("mouseenter", () => document.getElementById("cur").classList.add("hot"));
