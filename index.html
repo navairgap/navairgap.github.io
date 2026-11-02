@@ -157,9 +157,29 @@ h2.big{transform:skewY(var(--sk,0deg))}
     outline-offset: 4px;
   }
 }
+
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 110;
+  padding: 10px 14px;
+  background: var(--grn);
+  color: var(--bg);
+  font: 700 12px var(--mono);
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 16px;
+}
+#main-content:focus {
+  outline: 2px solid var(--grn);
+  outline-offset: 6px;
+}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <div class="scan"></div>
@@ -182,7 +202,7 @@ h2.big{transform:skewY(var(--sk,0deg))}
   <div class="skip">[ CLICK TO SKIP ]</div>
 </div>
 
-<main>
+<main id="main-content" tabindex="-1">
   <section id="s0">
     <div class="k">nav54877 // secure shell v2.6</div>
     <h1 class="mega">NAV<span class="o">AIR</span><span class="g">GAP</span></h1>
