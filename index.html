@@ -1470,24 +1470,90 @@ addEventListener("mousemove", (e) => {
 });
 
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+const fluidCanvas = document.getElementById("gl");
+const cursorElement = document.getElementById("cur");
+let destroyFluid = null;
+let fluidInitialized = false;
+let parallaxFrame = 0;
+let pageActive = document.visibilityState === "visible";
 
-/* Fluid simulation and pointer parallax are nonessential decoration. */
-if (!motionPreference.matches) {
-  try { fluidSimulation(document.getElementById("gl")); }
-  catch (e) { console.error("fluid failed to start", e); }
+function moveCustomCursor(e) {
+  cursorElement.style.left = e.clientX + "px";
+  cursorElement.style.top = e.clientY + "px";
 }
 
-/* Cursor follows the pointer; keep this still when reduced motion is requested. */
-if (!motionPreference.matches) {
-  addEventListener("mousemove", (e) => {
-    const cur = document.getElementById("cur");
-    cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
+function parallaxStep() {
+  if (!pageActive || motionPreference.matches) {
+    parallaxFrame = 0;
+    return;
+  }
+  mouse.cx += (mouse.x - mouse.cx) * .06;
+  mouse.cy += (mouse.y - mouse.cy) * .06;
+  document.querySelectorAll("h1.mega").forEach((el) => {
+    el.style.transform = `translate(${mouse.cx * -10}px,${mouse.cy * -6}px)`;
   });
-  (function par(){ requestAnimationFrame(par);
-    mouse.cx += (mouse.x - mouse.cx) * .06; mouse.cy += (mouse.y - mouse.cy) * .06;
-    document.querySelectorAll("h1.mega").forEach(el => { el.style.transform = `translate(${mouse.cx*-10}px,${mouse.cy*-6}px)`; });
-  })();
+  parallaxFrame = requestAnimationFrame(parallaxStep);
 }
+
+function stopDecorativeMotion() {
+  if (destroyFluid) {
+    destroyFluid();
+    destroyFluid = null;
+  }
+  fluidInitialized = false;
+  if (parallaxFrame) cancelAnimationFrame(parallaxFrame);
+  parallaxFrame = 0;
+  removeEventListener("mousemove", moveCustomCursor);
+  document.querySelectorAll("h1.mega").forEach((el) => { el.style.transform = ""; });
+  if (cursorElement) {
+    cursorElement.style.left = "";
+    cursorElement.style.top = "";
+  }
+}
+
+function startDecorativeMotion() {
+  if (!pageActive || motionPreference.matches) return;
+
+  if (!fluidInitialized) {
+    fluidInitialized = true;
+    try {
+      destroyFluid = fluidSimulation(fluidCanvas);
+    } catch (error) {
+      fluidInitialized = false;
+      console.warn("fluid background unavailable", error);
+    }
+  }
+
+  if (cursorElement) addEventListener("mousemove", moveCustomCursor);
+  if (!parallaxFrame) parallaxFrame = requestAnimationFrame(parallaxStep);
+}
+
+/* Preferences and page visibility can change without a reload. */
+function syncDecorativeMotion() {
+  if (!pageActive || motionPreference.matches) stopDecorativeMotion();
+  else startDecorativeMotion();
+}
+
+function handleVisibilityChange() {
+  pageActive = document.visibilityState === "visible";
+  syncDecorativeMotion();
+}
+
+function handlePageHide() {
+  pageActive = false;
+  syncDecorativeMotion();
+}
+
+function handlePageShow() {
+  pageActive = document.visibilityState === "visible";
+  syncDecorativeMotion();
+}
+
+motionPreference.addEventListener("change", syncDecorativeMotion);
+document.addEventListener("visibilitychange", handleVisibilityChange);
+addEventListener("pagehide", handlePageHide);
+addEventListener("pageshow", handlePageShow);
+syncDecorativeMotion();
 
 document.querySelectorAll("a,.row,.card,.clink").forEach((el) => {
   el.addEventListener("mouseenter", () => document.getElementById("cur").classList.add("hot"));
