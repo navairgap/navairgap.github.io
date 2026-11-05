@@ -1,0 +1,17 @@
+name: Static site checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  local-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify local HTML references
+        run: python scripts/check_local_links.py
