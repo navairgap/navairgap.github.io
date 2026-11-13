@@ -119,8 +119,8 @@ body.glitching .flash{animation:gflash .28s steps(2)}
 @keyframes mq{to{transform:translateX(-50%)}}
 .marquee b{color:var(--grn);font-weight:400}
 
-.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
-.rv.in{opacity:1;transform:none}
+.rv{opacity:0;translate:0 26px;transition:opacity .7s cubic-bezier(.2,.7,.2,1),translate .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;translate:none}
 h2.big{transform:skewY(var(--sk,0deg))}
 @media(max-width:860px){
   .cards{grid-template-columns:1fr}
