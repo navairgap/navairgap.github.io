@@ -1230,10 +1230,25 @@ addEventListener("click", e => {
   }
 });
 document.getElementById("copy-email").addEventListener("click", function () {
-  navigator.clipboard.writeText("nav54877@gmail.com").then(() => {
-    this.textContent = "copied ✓"; this.classList.add("copied");
+  const EMAIL = "nav54877@gmail.com";
+  const flash = (label) => {
+    this.textContent = label; this.classList.add("copied");
     setTimeout(() => { this.textContent = "copy"; this.classList.remove("copied"); }, 1800);
-  });
+  };
+  const fallbackCopy = () => {
+    const ta = document.createElement("textarea");
+    ta.value = EMAIL;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    flash(ok ? "copied ✓" : "copy failed");
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(EMAIL).then(() => flash("copied ✓")).catch(fallbackCopy);
+  } else fallbackCopy();
 });
 (() => {
   const bar = document.getElementById("progress");
