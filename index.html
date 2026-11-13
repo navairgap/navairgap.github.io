@@ -1472,6 +1472,7 @@ addEventListener("mousemove", (e) => {
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
 const fluidCanvas = document.getElementById("gl");
 const cursorElement = document.getElementById("cur");
+const megaHeadings = document.querySelectorAll("h1.mega");
 let destroyFluid = null;
 let fluidInitialized = false;
 let parallaxFrame = 0;
@@ -1489,7 +1490,7 @@ function parallaxStep() {
   }
   mouse.cx += (mouse.x - mouse.cx) * .06;
   mouse.cy += (mouse.y - mouse.cy) * .06;
-  document.querySelectorAll("h1.mega").forEach((el) => {
+  megaHeadings.forEach((el) => {
     el.style.transform = `translate(${mouse.cx * -10}px,${mouse.cy * -6}px)`;
   });
   parallaxFrame = requestAnimationFrame(parallaxStep);
@@ -1504,7 +1505,7 @@ function stopDecorativeMotion() {
   if (parallaxFrame) cancelAnimationFrame(parallaxFrame);
   parallaxFrame = 0;
   removeEventListener("mousemove", moveCustomCursor);
-  document.querySelectorAll("h1.mega").forEach((el) => { el.style.transform = ""; });
+  megaHeadings.forEach((el) => { el.style.transform = ""; });
   if (cursorElement) {
     cursorElement.style.left = "";
     cursorElement.style.top = "";
@@ -1626,13 +1627,14 @@ document.querySelectorAll(".rv").forEach((el) => rio.observe(el));
 
 /* velocity skew on big headings */
 let skewV = 0;
+const bigHeadings = document.querySelectorAll("h2.big");
 addEventListener("scroll", () => {
   const max = document.documentElement.scrollHeight - innerHeight;
   const target = max > 0 ? scrollY / max : 0;
   skewV = Math.min(Math.abs(target - scrollT) * 260, 6) * (target > scrollT ? 1 : -1);
   clearTimeout(window.__sk);
   window.__sk = setTimeout(() => (skewV = 0), 90);
-  document.querySelectorAll("h2.big").forEach((h) => h.style.setProperty("--sk", skewV.toFixed(2) + "deg"));
+  bigHeadings.forEach((h) => h.style.setProperty("--sk", skewV.toFixed(2) + "deg"));
 }, { passive: true });
 
 /* ================= terminal boot ================= */
