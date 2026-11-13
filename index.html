@@ -1610,7 +1610,17 @@ document.querySelectorAll("section").forEach((sec) => {
   });
 });
 const rio = new IntersectionObserver((es) => {
-  es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } });
+  es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    el.classList.add("in");
+    rio.unobserve(el);
+    /* the stagger delay only matters for the reveal itself; once shown,
+       clear it so hover feedback (card lift, row highlight) is instant */
+    const clearDelay = () => { el.style.transitionDelay = ""; };
+    el.addEventListener("transitionend", clearDelay, { once: true });
+    setTimeout(clearDelay, 1600);
+  });
 }, { threshold: 0.12 });
 document.querySelectorAll(".rv").forEach((el) => rio.observe(el));
 
