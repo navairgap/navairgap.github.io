@@ -1,0 +1,5 @@
+# local tool/plugin state, not part of the site
+.v2c/
+.video_agent/
+node_modules/
+__pycache__/
