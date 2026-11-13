@@ -6,7 +6,7 @@ security tooling by navairgap.
 
 ## Structure
 
-`index.html` is the whole landing — self-contained html/css/js with a WebGL fluid background, no build step. `/os/` serves the deployed build of portfolio-os. `assets/` holds generated images (boot gif, palette, previews).
+`index.html` is the whole landing — self-contained html/css/js with a WebGL fluid background, no build step. `classic.html` is the dossier-style alternate landing and `cv.html` the printable résumé, both hand-written too. `/os/` and `/dossier/` serve deployed builds (portfolio-os and the React dossier app); their hashed assets are committed as-is. `scripts/check_local_links.py` verifies internal href/src targets and runs in CI.
 
 ## Local dev
 
