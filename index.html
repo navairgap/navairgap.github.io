@@ -1582,6 +1582,7 @@ document.querySelectorAll("section").forEach((s) => io.observe(s));
 const POOL = "!<>-_\\/[]{}=+*^?#";
 function scramble(el) {
   if (el.dataset.busy) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   el.dataset.busy = "1";
   const orig = el.dataset.orig || (el.dataset.orig = el.textContent);
   let frame = 0;
