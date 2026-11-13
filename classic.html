@@ -892,6 +892,12 @@ h2, .skillrow .nm { text-shadow: 0 3px 22px rgba(0,0,0,.92), 0 0 4px #000; }
     setTimeout(() => dispatchEvent(new Event("bootdone")), 60);
     return;
   }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    boot.classList.add("done");
+    flash.remove();
+    setTimeout(() => dispatchEvent(new Event("bootdone")), 60);
+    return;
+  }
   const stages = [
     ["navairgap.sec — spooling the singularity", "dim", 4],
     ["> accreting matter ........ streaming", "", 26],
