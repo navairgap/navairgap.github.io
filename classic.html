@@ -1098,7 +1098,8 @@ io2.observe(document.getElementById("giant"));
       if (hpf) hpf.style.width = (hp2 * 100).toFixed(1) + "%";
     }
     const de = document.documentElement;
-    sp += ((de.scrollTop / (de.scrollHeight - de.clientHeight)) - sp) * .06;
+    const maxScroll = de.scrollHeight - de.clientHeight;
+    sp += ((maxScroll > 0 ? de.scrollTop / maxScroll : 0) - sp) * .06;
     if (window.__uni) window.__uni.u_scroll.value = sp;
   })();
 })();
