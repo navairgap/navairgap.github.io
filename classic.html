@@ -946,7 +946,7 @@ setInterval(() => {
     el.textContent = w.slice(0, ci);
     if (!del) { if (ci++ < w.length) return setTimeout(tick, 45); del = true; return setTimeout(tick, 1700); }
     if (ci-- > 0) return setTimeout(tick, 22);
-    del = false; ri = (ri + 1) % roles.length; setTimeout(tick, 300);
+    del = false; ri = (ri + 1) % roles.length; ci = 0; setTimeout(tick, 300);
   })();
 })();
 
