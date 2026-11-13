@@ -1671,6 +1671,7 @@ addEventListener("scroll", () => {
   }
   boot.addEventListener("click", finish);
   addEventListener("keydown", skipKey);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
   setTimeout(next, 350);
 
   /* hero typed line */
@@ -1678,6 +1679,7 @@ addEventListener("scroll", () => {
   let ci = 0;
   const tl = document.getElementById("typeline");
   function typeLine(){
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { tl.textContent = msg; return; }
     if (ci > msg.length) return;
     tl.textContent = msg.slice(0, ci++);
     setTimeout(typeLine, 26);
