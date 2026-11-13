@@ -56,7 +56,7 @@ a{color:inherit;text-decoration:none;cursor:none}
 #boot{position:fixed;inset:0;z-index:90;background:#040508;display:flex;align-items:center;justify-content:center;transition:opacity .7s}
 #boot.done{opacity:0;pointer-events:none}
 #boot pre{font-size:12px;line-height:1.9;color:var(--grn);width:min(560px,86vw);white-space:pre-wrap;text-shadow:0 0 8px rgba(47,191,113,.5)}
-#boot .skip{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;color:var(--dim);animation:blink 1.2s infinite}
+#boot .skip{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;color:var(--dim);animation:blink 1.2s infinite;background:none;border:0;cursor:pointer;font-family:inherit}
 @keyframes blink{50%{opacity:.25}}
 #boot pre .p{color:var(--pur)} #boot pre .r{color:var(--red)}
 
@@ -199,7 +199,7 @@ h2.big{transform:skewY(var(--sk,0deg))}
 
 <div id="boot">
   <pre id="bootlog"></pre>
-  <div class="skip">[ CLICK TO SKIP ]</div>
+  <button class="skip" type="button">[ CLICK OR ESC TO SKIP ]</button>
 </div>
 
 <main id="main-content" tabindex="-1">
@@ -1650,10 +1650,15 @@ addEventListener("scroll", () => {
   }
   function finish(){
     if (done) return; done = true;
+    removeEventListener("keydown", skipKey);
     boot.classList.add("done");
     typeLine();
   }
+  function skipKey(e){
+    if (e.key === "Enter" || e.key === " " || e.key === "Escape") { e.preventDefault(); finish(); }
+  }
   boot.addEventListener("click", finish);
+  addEventListener("keydown", skipKey);
   setTimeout(next, 350);
 
   /* hero typed line */
